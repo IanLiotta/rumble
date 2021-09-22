@@ -3,6 +3,7 @@ mod systems;
 mod map_builder;
 mod components;
 mod spawner;
+mod turn_state;
 
 mod prelude {
     pub use bracket_lib::prelude::*;
@@ -14,6 +15,7 @@ mod prelude {
     pub use crate::map_builder::*;
     pub use crate::components::*;
     pub use crate::spawner::*;
+    pub use crate::turn_state::*;
     pub const SCREEN_HEIGHT:i32 = 50;
     pub const SCREEN_WIDTH:i32 = 80;
     pub const ARENA_HEIGHT:usize = 40;
@@ -43,6 +45,7 @@ impl State {
         let mb = MapBuilder::new();
         resources.insert(mb.map);
         spawn_player(&mut world, Map::map_idx2point(mb.player_start));
+        resources.insert(TurnState::AwaitingInput);
         State {
             ecs: world,
             resources: resources,
@@ -56,11 +59,10 @@ impl State {
 impl GameState for State {
     // run by main_loop
     fn tick(&mut self, ctx: &mut BTerm) {
-        // limit framerate to FRAME_DURATION
-        self.frame_time += ctx.frame_time_ms;
-        if self.frame_time >= FRAME_DURATION {
-            // execute the systems scheduled in systems/mod.rs
-            self.player_systems.execute(&mut self.ecs, &mut self.resources);
+        let current_state = self.resources.get::<TurnState>().unwrap().clone();
+        match current_state {
+            TurnState::AwaitingInput => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
+            _ => {}
         }
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");
