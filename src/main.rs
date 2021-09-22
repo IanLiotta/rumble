@@ -60,14 +60,14 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         ctx.set_active_console(0);
         ctx.cls();
-        //let current_state = self.resources.get::<TurnState>().unwrap().clone();
-        match self.turn_state {
+        let current_state = self.resources.get::<TurnState>().unwrap().clone();
+        match current_state {
             TurnState::StartGame => {
                 self.ecs.push((Player, WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
-
-                self.turn_state = TurnState::AwaitingInput;
+                let mut change_state = self.resources.get_mut::<TurnState>().unwrap();
+                *change_state = TurnState::AwaitingInput;
             }
             TurnState::AwaitingInput => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
             _ => {}

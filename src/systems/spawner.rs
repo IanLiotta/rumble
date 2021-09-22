@@ -21,13 +21,13 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
 #[system(for_each)]
 #[read_component(WantsToSpawn)]
 #[read_component(Player)]
-pub fn spawn_mob(ecs: &mut SubWorld, player: Option<&Player>, entity: &Entity, _want_spawn: &WantsToSpawn, #[resource]map: &Map, commands: &mut CommandBuffer){
+pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsToSpawn, #[resource]map: &Map, commands: &mut CommandBuffer){
     let mut rng = RandomNumberGenerator::new();
     let mut mob_placed = false;
         while !mob_placed {
             let loc = Map::map_idx(rng.range(1, ARENA_WIDTH - 1), rng.range(1, ARENA_HEIGHT - 1));
             if map.tiles[loc] == TileType::Floor {
-               if let Some(player) = player {
+               if let Some(_player) = player {
                 commands.push(
                     (
                     Player,
