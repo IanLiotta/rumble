@@ -18,6 +18,9 @@ pub struct WantsToMove{
     pub destination: Point,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WantsToSpawn;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct MovementRange {
     pub move_range: Vec<usize>

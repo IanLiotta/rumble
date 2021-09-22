@@ -2,7 +2,6 @@ mod map;
 mod systems;
 mod map_builder;
 mod components;
-mod spawner;
 mod turn_state;
 mod movement_range;
 
@@ -15,7 +14,6 @@ mod prelude {
     pub use crate::systems::*;
     pub use crate::map_builder::*;
     pub use crate::components::*;
-    pub use crate::spawner::*;
     pub use crate::turn_state::*;
     pub use crate::movement_range::*;
     pub const SCREEN_HEIGHT:i32 = 50;
@@ -35,7 +33,7 @@ enum GameMode {
 struct State {
     ecs: World,
     resources: Resources,
-    game_mode: GameMode,
+    turn_state: TurnState,
     frame_time: f32,
     player_systems: Schedule,
 }
@@ -46,12 +44,11 @@ impl State {
         let mut resources = Resources::default();
         let mb = MapBuilder::new();
         resources.insert(mb.map);
-        spawn_player(&mut world, Map::map_idx2point(mb.player_start));
-        resources.insert(TurnState::AwaitingInput);
+        resources.insert(TurnState::StartGame);
         State {
             ecs: world,
             resources: resources,
-            game_mode: GameMode::Playing,
+            turn_state: TurnState::StartGame,
             frame_time: 0.0,
             player_systems: build_player_scheduler(),
         }
@@ -63,8 +60,15 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         ctx.set_active_console(0);
         ctx.cls();
-        let current_state = self.resources.get::<TurnState>().unwrap().clone();
-        match current_state {
+        //let current_state = self.resources.get::<TurnState>().unwrap().clone();
+        match self.turn_state {
+            TurnState::StartGame => {
+                self.ecs.push((Player, WantsToSpawn));
+                self.ecs.push(((), WantsToSpawn));
+                self.ecs.push(((), WantsToSpawn));
+
+                self.turn_state = TurnState::AwaitingInput;
+            }
             TurnState::AwaitingInput => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
             _ => {}
         }
