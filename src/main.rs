@@ -61,6 +61,8 @@ impl State {
 impl GameState for State {
     // run by main_loop
     fn tick(&mut self, ctx: &mut BTerm) {
+        ctx.set_active_console(0);
+        ctx.cls();
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::AwaitingInput => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
