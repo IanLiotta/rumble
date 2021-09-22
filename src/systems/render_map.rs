@@ -1,9 +1,8 @@
 use crate::prelude::*;
-use bracket_geometry::prelude::*;
 
 #[system]
 #[read_component(Player)]
-#[read_component(Point)]
+#[read_component(MovementRange)]
 pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state: &TurnState) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(0);
@@ -23,11 +22,9 @@ pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state:
     // draw player movement range
     match turn_state {
         TurnState::AwaitingInput => {
-            let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
-            players.iter(ecs).for_each(|(_, player_point)| {
-                let player_idx = Map::map_idx(player_point.x as usize, player_point.y as usize);
-                let tiles_to_highlight = tiles_in_range(map, 4.0, player_idx);
-                for t in tiles_to_highlight.iter() {
+            let mut players = <(Entity, &MovementRange)>::query().filter(component::<Player>());
+            players.iter(ecs).for_each(|(_, movement_range)| {
+                for t in &movement_range.move_range {
                     draw_batch.set(
                         Map::map_idx2point(*t),
                         ColorPair::new(GREEN, BLACK),
@@ -39,19 +36,4 @@ pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state:
         _ => {}
     }
     draw_batch.submit(0).expect("Batch error");
-}
-
-pub fn tiles_in_range(map: &Map, range: f32, origin: usize) -> Vec<usize> {
-    let mut result = Vec::new();
-    is_tile_in_range(map, range, origin, origin, &mut result);
-    result
-}
-
-fn is_tile_in_range(map: &Map, range: f32, origin: usize, cell: usize, solution: &mut Vec<usize>) {
-    solution.push(cell);
-    for n in Map::get_neighbors(map, cell) {
-        if !solution.contains(&n) && DistanceAlg::Manhattan.distance2d(Map::map_idx2point(n), Map::map_idx2point(origin)) <= range {
-            is_tile_in_range(map, range, origin, n, solution);
-        }
-    }
 }

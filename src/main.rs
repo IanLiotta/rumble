@@ -4,6 +4,7 @@ mod map_builder;
 mod components;
 mod spawner;
 mod turn_state;
+mod movement_range;
 
 mod prelude {
     pub use bracket_lib::prelude::*;
@@ -16,6 +17,7 @@ mod prelude {
     pub use crate::components::*;
     pub use crate::spawner::*;
     pub use crate::turn_state::*;
+    pub use crate::movement_range::*;
     pub const SCREEN_HEIGHT:i32 = 50;
     pub const SCREEN_WIDTH:i32 = 80;
     pub const ARENA_HEIGHT:usize = 40;

@@ -17,3 +17,8 @@ pub struct WantsToMove{
     pub entity: Entity,
     pub destination: Point,
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct MovementRange {
+    pub move_range: Vec<usize>
+}
