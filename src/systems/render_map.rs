@@ -3,22 +3,19 @@ use crate::prelude::*;
 #[system]
 #[read_component(Player)]
 #[read_component(MovementRange)]
-pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state: &TurnState) {
+pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state: &TurnState, #[resource]spritesheet: &Texture2D) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(0);
     // draw normal map tiles
     for idx in 0..map.tiles.len() {
         let tile_point = Map::map_idx2point(idx);
-        let glyph = match map.tiles[idx] {
-            TileType::Floor => to_cp437('.'),
-            TileType::Wall => to_cp437('#'),
+        let spr_idx = match map.tiles[idx] {
+            TileType::Floor => 0,
+            TileType::Wall => 1,
         };
-        draw_batch.set(
-            tile_point,
-            ColorPair::new(WHITE, BLACK),
-            glyph
-        );
+        draw_sprite(spritesheet, spr_idx, tile_point.x as f32, tile_point.y as f32)
     }
+    /*
     // draw player movement range
     match turn_state {
         TurnState::AwaitingInput => {
@@ -36,5 +33,5 @@ pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state:
         }
         _ => {}
     }
-    draw_batch.submit(0).expect("Batch error");
+    */
 }

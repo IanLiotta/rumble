@@ -4,9 +4,12 @@ mod map_builder;
 mod components;
 mod turn_state;
 mod movement_range;
+mod drawing;
 
 mod prelude {
+    pub use macroquad::prelude::*;
     pub use bracket_lib::prelude::*;
+    pub use bracket_lib::prelude::{Rect};
     pub use legion::*;
     pub use legion::world::SubWorld;
     pub use legion::systems::CommandBuffer;
@@ -16,11 +19,15 @@ mod prelude {
     pub use crate::components::*;
     pub use crate::turn_state::*;
     pub use crate::movement_range::*;
+    pub use crate::drawing::*;
     pub const SCREEN_HEIGHT:i32 = 50;
     pub const SCREEN_WIDTH:i32 = 80;
     pub const ARENA_HEIGHT:usize = 40;
     pub const ARENA_WIDTH:usize = 40;
     pub const FRAME_DURATION:f32 = 60.0; // holding on to this - probably good to limit cpu usage?
+    pub const SPRITESHEET_HEIGHT:i32 = 8;
+    pub const SPRITESHEET_WIDTH:i32 = 8;
+    pub const TILE_SIZE:f32 = 32.;
 }
 
 use prelude::*;
@@ -40,8 +47,13 @@ impl State {
         let world = World::default();
         let mut resources = Resources::default();
         let mb = MapBuilder::new();
+        let spritesheet = Texture2D::from_file_with_format(
+            include_bytes!("../resources/spritesheet.png"),
+            None,
+        );
         resources.insert(mb.map);
         resources.insert(TurnState::StartGame);
+        resources.insert(spritesheet);
         State {
             ecs: world,
             resources: resources,
@@ -54,39 +66,24 @@ impl State {
     }
 }
 
-impl GameState for State {
-    // run by main_loop
-    fn tick(&mut self, ctx: &mut BTerm) {
-        ctx.set_active_console(0);
-        ctx.cls();
-
-        let current_state = self.resources.get::<TurnState>().unwrap().clone();
+#[macroquad::main("rumble")]
+async fn main() {
+    let mut state = State::new();
+    loop {
+        clear_background(macroquad::color::BLACK);
+        let current_state = state.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::StartGame => {
                 // Move these mob creations into the round start system eventually
-                self.ecs.push((Player, WantsToSpawn));
-                self.ecs.push(((), WantsToSpawn));
-                self.ecs.push(((), WantsToSpawn));
-                self.round_start_systems.execute(&mut self.ecs, &mut self.resources);
+                state.ecs.push((Player, WantsToSpawn));
+                state.ecs.push(((), WantsToSpawn));
+                state.ecs.push(((), WantsToSpawn));
+                state.round_start_systems.execute(&mut state.ecs, &mut state.resources);
             }
-            TurnState::AwaitingInput => {self.input_systems.execute(&mut self.ecs, &mut self.resources);},
-            TurnState::PlayerTurn => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
-            TurnState::EnemyTurn => {self.enemy_systems.execute(&mut self.ecs, &mut self.resources);},
+            TurnState::AwaitingInput => {state.input_systems.execute(&mut state.ecs, &mut state.resources);},
+            TurnState::PlayerTurn => {state.player_systems.execute(&mut state.ecs, &mut state.resources);},
+            TurnState::EnemyTurn => {state.enemy_systems.execute(&mut state.ecs, &mut state.resources);},
         }
-        //draw the buffer constructed in multiple places elsewhere
-        render_draw_buffer(ctx).expect("Render error");
+        next_frame().await
     }
-}
-
-fn main() -> BError {
-    let context = BTermBuilder::new()
-        .with_resource_path("resources/")
-        .with_font("terminal8x8.png", 8, 8)
-        .with_tile_dimensions(16, 16)
-        .with_dimensions(SCREEN_WIDTH, SCREEN_HEIGHT)
-        .with_title("Rumble")
-        .with_fancy_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
-        .build()?;
-    let gs = State::new();
-    main_loop(context, gs)
 }

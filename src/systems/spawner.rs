@@ -15,8 +15,7 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                     Player,
                     Map::map_idx2point(loc),
                     Render{
-                        color: ColorPair::new(BLUE,BLACK),
-                        glyph: to_cp437('@'),
+                        spr_idx: 2
                     },
                     MovementRange {move_range: Vec::new()}
                     )
@@ -27,8 +26,7 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                         Enemy,
                         Map::map_idx2point(loc),
                         Render{
-                            color: ColorPair::new(YELLOW,BLACK),
-                            glyph: 3,
+                            spr_idx: 3,
                         },
                         MovementRange {move_range: Vec::new()}
                         )
