@@ -25,3 +25,6 @@ pub struct WantsToSpawn;
 pub struct MovementRange {
     pub move_range: Vec<usize>
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MovesRandomly;
