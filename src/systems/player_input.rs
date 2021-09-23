@@ -10,6 +10,7 @@ use crate::prelude::*;
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource]map: &Map,
+    #[resource]turn_state: &mut TurnState,
     commands: &mut CommandBuffer,
 ) 
 {
@@ -27,6 +28,7 @@ pub fn player_input(
         if INPUT.lock().is_mouse_button_pressed(0) && possible_moves.contains(&mouse_idx)
         {
             commands.push(((), WantsToMove{entity: *player, destination: mouse_pos}));
+            *turn_state = TurnState::PlayerTurn;
         }
     });
 }

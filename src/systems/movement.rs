@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+// Consumes WantsToMove message-entities and attempts the move
+// Also the place for synching the camera eventually
 #[system(for_each)]
 #[read_component(Player)]
 pub fn move_entity(

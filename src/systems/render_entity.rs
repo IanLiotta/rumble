@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[system]
 #[read_component(Point)]
 #[read_component(Render)]
-pub fn render_entity(ecs: &SubWorld, #[resource]map: &Map){
+pub fn render_entity(ecs: &SubWorld){
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(0);
     <(&Point, &Render)>::query()

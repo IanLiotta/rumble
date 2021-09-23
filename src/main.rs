@@ -20,27 +20,24 @@ mod prelude {
     pub const SCREEN_WIDTH:i32 = 80;
     pub const ARENA_HEIGHT:usize = 40;
     pub const ARENA_WIDTH:usize = 40;
-    pub const FRAME_DURATION:f32 = 60.0;
+    pub const FRAME_DURATION:f32 = 60.0; // holding on to this - probably good to limit cpu usage?
 }
 
 use prelude::*;
 
-enum GameMode {
-    Playing,
-    Shop,
-}
-
 struct State {
     ecs: World,
     resources: Resources,
-    turn_state: TurnState,
     frame_time: f32,
+    round_start_systems: Schedule,
+    input_systems: Schedule,
     player_systems: Schedule,
+    enemy_systems: Schedule,
 }
 
 impl State {
     pub fn new() -> Self {
-        let mut world = World::default();
+        let world = World::default();
         let mut resources = Resources::default();
         let mb = MapBuilder::new();
         resources.insert(mb.map);
@@ -48,9 +45,11 @@ impl State {
         State {
             ecs: world,
             resources: resources,
-            turn_state: TurnState::StartGame,
             frame_time: 0.0,
+            round_start_systems: build_round_start_scheduler(),
+            input_systems: build_input_scheduler(),
             player_systems: build_player_scheduler(),
+            enemy_systems: build_enemy_scheduler(),
         }
     }
 }
@@ -60,17 +59,21 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         ctx.set_active_console(0);
         ctx.cls();
+
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::StartGame => {
                 self.ecs.push((Player, WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
-                let mut change_state = self.resources.get_mut::<TurnState>().unwrap();
-                *change_state = TurnState::AwaitingInput;
+                // possibly do this with current_state somehow instead of getting state again?
+                //let mut change_state = self.resources.get_mut::<TurnState>().unwrap();
+                //*change_state = TurnState::PlayerTurn;
+                self.round_start_systems.execute(&mut self.ecs, &mut self.resources);
             }
-            TurnState::AwaitingInput => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
-            _ => {}
+            TurnState::AwaitingInput => {self.input_systems.execute(&mut self.ecs, &mut self.resources);},
+            TurnState::PlayerTurn => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
+            TurnState::EnemyTurn => {self.enemy_systems.execute(&mut self.ecs, &mut self.resources);},
         }
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");
