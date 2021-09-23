@@ -16,7 +16,6 @@ impl MapBuilder {
         };
         mb.enclose_map();
         mb.random_obstacles(&mut rng);
-        mb.place_player(&mut rng);
         mb
     }
 
@@ -52,16 +51,4 @@ impl MapBuilder {
             });
         }
     }
-
-    fn place_player(&mut self, rng: &mut RandomNumberGenerator) {
-        let mut player_placed = false;
-        while !player_placed {
-            let loc = Map::map_idx(rng.range(1, ARENA_WIDTH - 1), rng.range(1, ARENA_HEIGHT - 1));
-            if self.map.tiles[loc] == TileType::Floor {
-                self.player_start = loc;
-                player_placed = true;
-            }
-        }
-    }
-
 }

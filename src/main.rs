@@ -63,12 +63,10 @@ impl GameState for State {
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::StartGame => {
+                // Move these mob creations into the round start system eventually
                 self.ecs.push((Player, WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
-                // possibly do this with current_state somehow instead of getting state again?
-                //let mut change_state = self.resources.get_mut::<TurnState>().unwrap();
-                //*change_state = TurnState::PlayerTurn;
                 self.round_start_systems.execute(&mut self.ecs, &mut self.resources);
             }
             TurnState::AwaitingInput => {self.input_systems.execute(&mut self.ecs, &mut self.resources);},
