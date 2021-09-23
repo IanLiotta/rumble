@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+// helper function to find tiles within a certain distance of an origin point
 pub fn tiles_in_range(map: &Map, range: f32, origin: usize) -> Vec<usize> {
     let mut result = Vec::new();
     is_tile_in_range(map, range, origin, origin, &mut result);

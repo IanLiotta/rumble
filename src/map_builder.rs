@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 pub struct MapBuilder {
     pub map: Map,
-    pub player_start: usize,
     pub obstacles: Vec<Rect>,
 }
 
@@ -11,7 +10,6 @@ impl MapBuilder {
         let mut rng = RandomNumberGenerator::new();
         let mut mb = MapBuilder{
             map: Map::new(),
-            player_start: usize::default(),
             obstacles: Vec::new(),
         };
         mb.enclose_map();
