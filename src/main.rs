@@ -57,9 +57,20 @@ impl State {
 impl GameState for State {
     // run by main_loop
     fn tick(&mut self, ctx: &mut BTerm) {
+        let mut input_events = std::collections::VecDeque::<BEvent>::new();
+        while let Some(event) = INPUT.lock().pop() {
+            match event {
+                BEvent::CloseRequested => {
+                    ctx.quitting = true;
+                },
+                _ => {
+                    input_events.push_back(event);
+                }
+            }
+        }
+        self.resources.insert(input_events);
         ctx.set_active_console(0);
         ctx.cls();
-
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::StartGame => {
@@ -86,6 +97,7 @@ fn main() -> BError {
         .with_dimensions(SCREEN_WIDTH, SCREEN_HEIGHT)
         .with_title("Rumble")
         .with_fancy_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
+        .with_advanced_input(true)
         .build()?;
     let gs = State::new();
     main_loop(context, gs)
