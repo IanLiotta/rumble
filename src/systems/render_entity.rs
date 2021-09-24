@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[write_component(DrawOffset)]
 pub fn render_entity(ecs: &mut SubWorld){
     let mut draw_batch = DrawBatch::new();
-    draw_batch.target(0);
+    draw_batch.target(1);
     <(&Point, &Render, &mut DrawOffset)>::query()
         .iter_mut(ecs)
         .for_each(|(pos, render, offset)|{

@@ -16,7 +16,7 @@ mod prelude {
     pub use crate::components::*;
     pub use crate::turn_state::*;
     pub use crate::movement_range::*;
-    pub const SCREEN_HEIGHT:i32 = 50;
+    pub const SCREEN_HEIGHT:i32 = 60;
     pub const SCREEN_WIDTH:i32 = 80;
     pub const ARENA_HEIGHT:usize = 40;
     pub const ARENA_WIDTH:usize = 40;
@@ -69,6 +69,10 @@ impl GameState for State {
         self.resources.insert(input_events);
         ctx.set_active_console(0);
         ctx.cls();
+        ctx.set_active_console(1);
+        ctx.cls();
+        ctx.set_active_console(2);
+        ctx.cls();
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::StartGame => {
@@ -94,7 +98,9 @@ fn main() -> BError {
         .with_tile_dimensions(16, 16)
         .with_dimensions(SCREEN_WIDTH, SCREEN_HEIGHT)
         .with_title("Rumble")
+        .with_simple_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
         .with_fancy_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
+        .with_sparse_console_no_bg(40, 30, "terminal8x8.png")
         .with_advanced_input(true)
         .build()?;
     let gs = State::new();
