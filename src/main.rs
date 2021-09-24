@@ -20,7 +20,6 @@ mod prelude {
     pub const SCREEN_WIDTH:i32 = 80;
     pub const ARENA_HEIGHT:usize = 40;
     pub const ARENA_WIDTH:usize = 40;
-    pub const FRAME_DURATION:f32 = 60.0; // holding on to this - probably good to limit cpu usage?
 }
 
 use prelude::*;
@@ -28,7 +27,6 @@ use prelude::*;
 struct State {
     ecs: World,
     resources: Resources,
-    frame_time: f32,
     round_start_systems: Schedule,
     input_systems: Schedule,
     player_systems: Schedule,
@@ -45,7 +43,6 @@ impl State {
         State {
             ecs: world,
             resources: resources,
-            frame_time: 0.0,
             round_start_systems: build_round_start_scheduler(),
             input_systems: build_input_scheduler(),
             player_systems: build_player_scheduler(),

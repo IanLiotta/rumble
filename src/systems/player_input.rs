@@ -18,7 +18,7 @@ pub fn player_input(
     let input = INPUT.lock();
     let mut mobs = <(Entity, &Point)>::query();
     let mut mobs_idx = Vec::new();
-    mobs.iter(ecs).for_each(|(mob, mob_point)| {
+    mobs.iter(ecs).for_each(|(_, mob_point)| {
         mobs_idx.push(Map::map_idx(mob_point.x as usize, mob_point.y as usize));
     });
     let mut players = mobs.filter(component::<Player>());
