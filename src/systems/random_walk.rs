@@ -16,5 +16,5 @@ pub fn random_walk(entity: &Entity, start_loc: &Point, commands: &mut CommandBuf
         2 => Point::new(0, -1),
         _ => Point::new(0, 1),
     } + *start_loc;
-    commands.push(((), WantsToMove{entity: *entity, destination}));
+    commands.push(((), WantsToMove{entity: *entity, source:*start_loc, destination}));
 }

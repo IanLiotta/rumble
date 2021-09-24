@@ -18,6 +18,10 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                         color: ColorPair::new(BLUE,BLACK),
                         glyph: to_cp437('@'),
                     },
+                    DrawOffset{
+                        offset_x: 0.0,
+                        offset_y: 0.0,
+                    },
                     MovementRange {move_range: Vec::new()}
                     )
                 );
@@ -29,6 +33,10 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                         Render{
                             color: ColorPair::new(YELLOW,BLACK),
                             glyph: 3,
+                        },
+                        DrawOffset{
+                            offset_x: 0.0,
+                            offset_y: 0.0,
                         },
                         MovementRange {move_range: Vec::new()}
                         )

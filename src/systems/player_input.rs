@@ -36,7 +36,7 @@ pub fn player_input(
             match event {
                 BEvent::MouseButtonDown{button: 0} => {
                     if !mobs_idx.contains(&mouse_idx) && possible_moves.contains(&mouse_idx) {
-                        commands.push(((), WantsToMove{entity: *player, destination: mouse_pos}));
+                        commands.push(((), WantsToMove{entity: *player, source:*player_pos, destination: mouse_pos}));
                         *turn_state = TurnState::PlayerTurn;
                     }      
                 },
