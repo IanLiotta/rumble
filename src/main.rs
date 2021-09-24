@@ -57,6 +57,7 @@ impl State {
 impl GameState for State {
     // run by main_loop
     fn tick(&mut self, ctx: &mut BTerm) {
+        // watch the input event queue for quit events, pass the rest along to the input system
         let mut input_events = std::collections::VecDeque::<BEvent>::new();
         while let Some(event) = INPUT.lock().pop() {
             match event {
