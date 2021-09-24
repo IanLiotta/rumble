@@ -12,7 +12,7 @@ pub fn player_input(
     #[resource]map: &Map,
     #[resource]turn_state: &mut TurnState,
     commands: &mut CommandBuffer,
-)   
+) 
 {
     let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
     let mouse_pos = INPUT.lock().mouse_tile(0);

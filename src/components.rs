@@ -2,7 +2,8 @@ pub use crate::prelude::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Render {
-    pub spr_idx: i32,
+    pub color: ColorPair,
+    pub glyph: FontCharType,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
