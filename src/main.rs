@@ -100,7 +100,7 @@ fn main() -> BError {
         .with_title("Rumble")
         .with_simple_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
         .with_fancy_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
-        .with_sparse_console_no_bg(40, 30, "terminal8x8.png")
+        .with_sparse_console(SCREEN_WIDTH, SCREEN_HEIGHT, "terminal8x8.png")
         .with_advanced_input(true)
         .build()?;
     let gs = State::new();
