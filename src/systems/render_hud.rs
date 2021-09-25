@@ -14,5 +14,5 @@ pub fn render_hud() {
         ColorPair::new(RED,BLACK),
     );
     draw_batch.print_color_centered(50, "Test HUD", ColorPair::new(RED,WHITE));
-    draw_batch.submit(1800).expect("Batch error");
+    draw_batch.submit(2200).expect("Batch error");
 }

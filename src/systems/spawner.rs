@@ -40,7 +40,7 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                             offset_y: 0.0,
                         },
                         MovementRange {move_range: Vec::new()},
-                        Health {hp: 1},
+                        Health {hp: 3},
                         MovesRandomly,
                         ),
                     );

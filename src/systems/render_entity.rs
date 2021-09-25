@@ -21,9 +21,10 @@ pub fn render_entity(ecs: &mut SubWorld){
                 render.color,
                 render.glyph
             ); 
-            if offset.offset_x != 0.0 {offset.offset_x -= offset.offset_x.signum()*0.1};
-            if offset.offset_y != 0.0 {offset.offset_y -= offset.offset_y.signum()*0.1};
+            if offset.offset_x.abs() >= 0.1 { offset.offset_x -= offset.offset_x.signum()*0.1} else {offset.offset_x = 0.0};
+            if offset.offset_y.abs() >= 0.1 { offset.offset_y -= offset.offset_y.signum()*0.1} else {offset.offset_y = 0.0};
+
 
         });
-    draw_batch.submit(1700).expect("Batch error");
+    draw_batch.submit(2100).expect("Batch error");
 }

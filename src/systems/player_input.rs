@@ -28,7 +28,7 @@ pub fn player_input(
     players.iter(ecs).for_each(|(player, player_pos)| 
     {
         // find the valid moves within the player's movement range
-        let possible_moves = tiles_in_range(map, 2.0, Map::map_idx(player_pos.x as usize, player_pos.y as usize));
+        let possible_moves = tiles_in_range(map, 10.0, Map::map_idx(player_pos.x as usize, player_pos.y as usize));
         // queue command to add the MovementRange component to the player entity
         commands.add_component(*player, MovementRange{move_range: possible_moves.clone()});
         // if a valid tile is clicked, queue a message-entity that the player wants to move

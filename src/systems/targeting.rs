@@ -13,17 +13,22 @@ pub fn targeting(
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
     <(Entity, &WantsToAttack)>::query().iter(ecs).for_each(|(entity, attacker)| {
-        let mut target_tiles = tiles_in_range(map, 10.0, Map::map_idx(attacker.pos.x as usize, attacker.pos.y as usize));
+        let target_tiles = tiles_in_range(map, 10.0, Map::map_idx(attacker.pos.x as usize, attacker.pos.y as usize));
         // exclude the 0th target_tile, that's the player
         target_tiles[1..].iter().for_each(|target|{
             draw_batch.set(
                 Map::map_idx2point(*target),
                 ColorPair::new(RGBA::from_f32(1.0, 0.0, 0.0, 0.5), BLACK),
-                to_cp437('.')
+                178
             );
         });
         let input = INPUT.lock();
             let mouse_pos = input.mouse_tile(0);
+            draw_batch.set(
+                mouse_pos,
+                ColorPair::new(RGBA::from_f32(1.0, 0.0, 0.0, 0.8), BLACK),
+                to_cp437('X')
+            );
             let mouse_idx = Map::map_idx(mouse_pos.x as usize, mouse_pos.y as usize);
             while let Some(event) = input_events.pop_front() {
                 match event {
@@ -34,7 +39,6 @@ pub fn targeting(
                             for entity in entities.iter() {
                                 commands.add_component(*entity, DirectDamage{amount: 1});
                             }
-                            //commands.push(((), DirectDamage{amount: 1}));
                             commands.remove(*entity);
                             *turn_state = TurnState::EnemyTurn;
                         } else {
@@ -46,7 +50,7 @@ pub fn targeting(
                 }
             }
     });
-    draw_batch.submit(1900).expect("Batch error");
+    draw_batch.submit(2200).expect("Batch error");
 
     
 
