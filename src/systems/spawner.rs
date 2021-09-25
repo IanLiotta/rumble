@@ -38,8 +38,9 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                             offset_x: 0.0,
                             offset_y: 0.0,
                         },
-                        MovementRange {move_range: Vec::new()}
-                        )
+                        MovementRange {move_range: Vec::new()},
+                        MovesRandomly,
+                        ),
                     );
                 }
                  

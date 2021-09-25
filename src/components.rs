@@ -19,6 +19,11 @@ pub struct WantsToMove{
     pub destination: Point,
 }
 
+pub struct WantsToAttack {
+    pub attacker: Entity,
+    pub pos: Point,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToSpawn;
 

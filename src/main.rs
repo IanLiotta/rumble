@@ -29,6 +29,7 @@ struct State {
     resources: Resources,
     round_start_systems: Schedule,
     input_systems: Schedule,
+    targeting_systems: Schedule,
     player_systems: Schedule,
     enemy_systems: Schedule,
 }
@@ -45,6 +46,7 @@ impl State {
             resources: resources,
             round_start_systems: build_round_start_scheduler(),
             input_systems: build_input_scheduler(),
+            targeting_systems: build_targeting_scheduler(),
             player_systems: build_player_scheduler(),
             enemy_systems: build_enemy_scheduler(),
         }
@@ -83,6 +85,7 @@ impl GameState for State {
                 self.round_start_systems.execute(&mut self.ecs, &mut self.resources);
             }
             TurnState::AwaitingInput => {self.input_systems.execute(&mut self.ecs, &mut self.resources);},
+            TurnState::PlayerTargeting => {self.targeting_systems.execute(&mut self.ecs, &mut self.resources);},
             TurnState::PlayerTurn => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
             TurnState::EnemyTurn => {self.enemy_systems.execute(&mut self.ecs, &mut self.resources);},
         }

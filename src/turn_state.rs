@@ -2,6 +2,7 @@
 pub enum TurnState {
     StartGame,
     AwaitingInput,
+    PlayerTargeting,
     PlayerTurn,
     EnemyTurn,
 }

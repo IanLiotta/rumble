@@ -8,6 +8,7 @@ mod spawner;
 mod end_turn;
 mod random_walk;
 mod render_hud;
+mod targeting;
 
 pub fn build_round_start_scheduler() -> Schedule {
     Schedule::builder()
@@ -26,10 +27,17 @@ pub fn build_input_scheduler() -> Schedule {
     .build()
 }
 
+pub fn build_targeting_scheduler() -> Schedule {
+    Schedule::builder()
+    .add_system(targeting::targeting_system())
+    .add_system(render_map::render_map_system())
+    .add_system(render_entity::render_entity_system())
+    .add_system(render_hud::render_hud_system())
+    .build()
+}
+
 pub fn build_player_scheduler() -> Schedule {
     Schedule::builder()
-        .add_system(movement::move_entity_system())
-        .flush()
         .add_system(render_map::render_map_system())
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
@@ -42,6 +50,8 @@ pub fn build_enemy_scheduler() -> Schedule {
     .add_system(spawner::spawn_mob_system())
     .flush()
     .add_system(random_walk::random_walk_system())
+    .flush()
+    .add_system(movement::move_entity_system())
     .flush()
     .add_system(render_map::render_map_system())
     .add_system(render_entity::render_entity_system())

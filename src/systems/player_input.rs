@@ -40,6 +40,10 @@ pub fn player_input(
                         *turn_state = TurnState::PlayerTurn;
                     }      
                 },
+                BEvent::KeyboardInput{key: VirtualKeyCode::Key1, pressed:true, ..} => {
+                    commands.push(((), WantsToAttack{attacker: *player, pos: *player_pos}));
+                    *turn_state = TurnState::PlayerTargeting;
+                },
                 _ => {}
             }
         }

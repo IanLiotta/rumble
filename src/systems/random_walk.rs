@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[read_component(Enemy)]
 #[read_component(Point)]
 #[read_component(MovesRandomly)]
-pub fn random_walk(entity: &Entity, start_loc: &Point, commands: &mut CommandBuffer)
+pub fn random_walk(entity: &Entity, start_loc: &Point, _moves_rand: &MovesRandomly, commands: &mut CommandBuffer)
 {
     let mut rng = RandomNumberGenerator::new();
     //Pick a random direction to move
