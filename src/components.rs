@@ -12,6 +12,10 @@ pub struct Player;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Enemy;
 
+pub struct Health {
+    pub hp: i32,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToMove{
     pub entity: Entity,
@@ -22,6 +26,10 @@ pub struct WantsToMove{
 pub struct WantsToAttack {
     pub attacker: Entity,
     pub pos: Point,
+}
+
+pub struct DirectDamage {
+    pub amount: i32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

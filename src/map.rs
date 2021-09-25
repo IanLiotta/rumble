@@ -9,12 +9,21 @@ pub enum TileType {
 
 pub struct Map {
     pub tiles: Vec<TileType>,
+    pub tile_contents: Vec<Vec<Entity>>,
 }
 
 impl Map {
     pub fn new() -> Self {
         Self {
             tiles: vec![TileType::Floor; NUM_TILES],
+            tile_contents: vec![Vec::new(); ARENA_HEIGHT*ARENA_WIDTH],
+        }
+    }
+
+    // clear the tile_contents
+    pub fn clear_content_index(&mut self) {
+        for content in self.tile_contents.iter_mut() {
+            content.clear();
         }
     }
 
