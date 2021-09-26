@@ -8,7 +8,7 @@ pub struct MapBuilder {
 impl MapBuilder {
     pub fn new() -> Self {
         let mut rng = RandomNumberGenerator::new();
-        let mut mb = MapBuilder{
+        let mut mb = MapBuilder {
             map: Map::new(),
             obstacles: Vec::new(),
         };
@@ -17,7 +17,7 @@ impl MapBuilder {
         mb
     }
 
-    fn enclose_map(&mut self){
+    fn enclose_map(&mut self) {
         for i in 0..ARENA_WIDTH {
             let fill_idx1 = Map::map_idx(i, 0);
             let fill_idx2 = Map::map_idx(i, ARENA_HEIGHT - 1);
@@ -33,12 +33,12 @@ impl MapBuilder {
     }
 
     fn random_obstacles(&mut self, rng: &mut RandomNumberGenerator) {
-        for _i in 0..rng.range(4,12) {
+        for _i in 0..rng.range(4, 12) {
             let obs = Rect::with_size(
                 rng.range(1, ARENA_WIDTH - 5),
                 rng.range(1, ARENA_HEIGHT - 5),
                 rng.range(2, 8),
-                rng.range(2, 8)
+                rng.range(2, 8),
             );
             self.obstacles.push(obs);
             obs.for_each(|o| {

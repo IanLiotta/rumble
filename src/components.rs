@@ -2,13 +2,13 @@ pub use crate::prelude::*;
 use std::collections::HashSet;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct FieldOfView{
+pub struct FieldOfView {
     pub visible_tiles: HashSet<Point>,
     pub radius: i32,
     pub is_dirty: bool,
 }
 
-impl FieldOfView{
+impl FieldOfView {
     pub fn new(radius: i32) -> Self {
         Self {
             visible_tiles: HashSet::new(),
@@ -26,24 +26,10 @@ impl FieldOfView{
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Render {
-    pub color: ColorPair,
-    pub glyph: FontCharType,
-}
+// Message Types
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Player;
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Enemy;
-
-pub struct Health {
-    pub hp: i32,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct WantsToMove{
+pub struct WantsToMove {
     pub entity: Entity,
     pub source: Point,
     pub destination: Point,
@@ -61,13 +47,34 @@ pub struct DirectDamage {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToSpawn;
 
+// Mob traits
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Render {
+    pub color: ColorPair,
+    pub glyph: FontCharType,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Player;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Enemy;
+
+pub struct Health {
+    pub hp: i32,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct MovementRange {
-    pub move_range: Vec<usize>
+    pub move_range: Vec<usize>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MovesRandomly;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ChasesPlayer;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct DrawOffset {

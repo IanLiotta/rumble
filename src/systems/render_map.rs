@@ -11,19 +11,14 @@ pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state:
     draw_batch.target(0);
     // draw normal map tiles
     for idx in 0..map.tiles.len() {
-        if player_fov.visible_tiles.contains(&Map::map_idx2point(idx)){
+        if player_fov.visible_tiles.contains(&Map::map_idx2point(idx)) {
             let tile_point = Map::map_idx2point(idx);
             let glyph = match map.tiles[idx] {
                 TileType::Floor => to_cp437('.'),
                 TileType::Wall => to_cp437('#'),
             };
-            draw_batch.set(
-                tile_point,
-                ColorPair::new(WHITE, BLACK),
-                glyph
-            );
+            draw_batch.set(tile_point, ColorPair::new(WHITE, BLACK), glyph);
         }
-        
     }
     // draw player movement range
     match turn_state {
@@ -35,7 +30,7 @@ pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state:
                     draw_batch.set(
                         Map::map_idx2point(*t),
                         ColorPair::new(GREEN, BLACK),
-                        to_cp437('.')
+                        to_cp437('.'),
                     );
                 }
             });

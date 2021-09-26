@@ -1,5 +1,5 @@
 use crate::prelude::*;
-const NUM_TILES:usize = (ARENA_HEIGHT * ARENA_WIDTH) as usize;
+const NUM_TILES: usize = (ARENA_HEIGHT * ARENA_WIDTH) as usize;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
@@ -16,7 +16,7 @@ impl Map {
     pub fn new() -> Self {
         Self {
             tiles: vec![TileType::Floor; NUM_TILES],
-            tile_contents: vec![Vec::new(); ARENA_HEIGHT*ARENA_WIDTH],
+            tile_contents: vec![Vec::new(); ARENA_HEIGHT * ARENA_WIDTH],
         }
     }
 
@@ -31,7 +31,7 @@ impl Map {
     pub fn map_idx(x: usize, y: usize) -> usize {
         ((y * ARENA_WIDTH as usize) + x) as usize
     }
-    
+
     // turns striding index into a Point
     pub fn map_idx2point(idx: usize) -> Point {
         Point::new(idx % ARENA_WIDTH, idx / ARENA_WIDTH)
@@ -39,13 +39,22 @@ impl Map {
 
     // returns true if the tile is in bounds and not a wall
     pub fn can_enter_tile(&self, point: Point) -> bool {
-        point.x >= 0 && point.x < ARENA_WIDTH as i32 && point.y >= 0 && point.y < ARENA_HEIGHT as i32 && self.tiles[Map::map_idx(point.x as usize, point.y as usize)] == TileType::Floor
+        point.x >= 0
+            && point.x < ARENA_WIDTH as i32
+            && point.y >= 0
+            && point.y < ARENA_HEIGHT as i32
+            && self.tiles[Map::map_idx(point.x as usize, point.y as usize)] == TileType::Floor
     }
 
     // get the neighboring cells that can be moved into
     pub fn get_neighbors(map: &Map, origin: usize) -> Vec<usize> {
         let mut result = Vec::new();
-        let deltas = [origin + 1, origin - 1, origin + ARENA_HEIGHT, origin - ARENA_HEIGHT];
+        let deltas = [
+            origin + 1,
+            origin - 1,
+            origin + ARENA_HEIGHT,
+            origin - ARENA_HEIGHT,
+        ];
         for d in deltas {
             if map.can_enter_tile(Map::map_idx2point(d)) {
                 result.push(d);
@@ -54,14 +63,17 @@ impl Map {
         result
     }
 
-    pub fn in_bounds(&self, point : Point) -> bool {
-        point.x >= 0 && point.x < ARENA_WIDTH as i32 && point.y >= 0 && point.y < ARENA_HEIGHT as i32
+    pub fn in_bounds(&self, point: Point) -> bool {
+        point.x >= 0
+            && point.x < ARENA_WIDTH as i32
+            && point.y >= 0
+            && point.y < ARENA_HEIGHT as i32
     }
 
     fn valid_exit(&self, loc: Point, delta: Point) -> Option<usize> {
         let destination = loc + delta;
-        if self.in_bounds(destination){
-            if self.can_enter_tile(destination){
+        if self.in_bounds(destination) {
+            if self.can_enter_tile(destination) {
                 let idx = Map::map_idx(destination.x as usize, destination.y as usize);
                 Some(idx)
             } else {
@@ -93,10 +105,7 @@ impl BaseMap for Map {
     }
 
     fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
-        DistanceAlg::Pythagoras.distance2d(
-            self.index_to_point2d(idx1),
-            self.index_to_point2d(idx2)
-        )
+        DistanceAlg::Pythagoras.distance2d(self.index_to_point2d(idx1), self.index_to_point2d(idx2))
     }
 
     fn is_opaque(&self, idx: usize) -> bool {

@@ -10,12 +10,11 @@ use crate::prelude::*;
 #[read_component(FieldOfView)]
 pub fn player_input(
     ecs: &mut SubWorld,
-    #[resource]map: &Map,
-    #[resource]turn_state: &mut TurnState,
-    #[resource]input_events: &mut std::collections::VecDeque<BEvent>,
+    #[resource] map: &Map,
+    #[resource] turn_state: &mut TurnState,
+    #[resource] input_events: &mut std::collections::VecDeque<BEvent>,
     commands: &mut CommandBuffer,
-) 
-{
+) {
     let input = INPUT.lock();
     let mut mobs = <(Entity, &Point)>::query();
     let mut mobs_idx = Vec::new();
@@ -29,30 +28,60 @@ pub fn player_input(
     let mut fov = <&FieldOfView>::query().filter(component::<Player>());
     let player_fov = fov.iter(ecs).nth(0).unwrap();
     // find each player controlled entity
-    players.iter(ecs).for_each(|(player, player_pos)| 
-    {
+    players.iter(ecs).for_each(|(player, player_pos)| {
         // find the valid moves within the player's movement range
         let mut possible_moves: Vec<usize> = vec![];
-        tiles_in_range(map, 10.0, Map::map_idx(player_pos.x as usize, player_pos.y as usize)).iter().for_each(|tile| {
-            if player_fov.visible_tiles.contains(&Map::map_idx2point(*tile)) {
+        tiles_in_range(
+            map,
+            10.0,
+            Map::map_idx(player_pos.x as usize, player_pos.y as usize),
+        )
+        .iter()
+        .for_each(|tile| {
+            if player_fov
+                .visible_tiles
+                .contains(&Map::map_idx2point(*tile))
+            {
                 possible_moves.push(*tile);
             }
         });
         // queue command to add the MovementRange component to the player entity
-        commands.add_component(*player, MovementRange{move_range: possible_moves.clone()});
+        commands.add_component(
+            *player,
+            MovementRange {
+                move_range: possible_moves.clone(),
+            },
+        );
         // if a valid tile is clicked, queue a message-entity that the player wants to move
         while let Some(event) = input_events.pop_front() {
             match event {
-                BEvent::MouseButtonDown{button: 0} => {
+                BEvent::MouseButtonDown { button: 0 } => {
                     if !mobs_idx.contains(&mouse_idx) && possible_moves.contains(&mouse_idx) {
-                        commands.push(((), WantsToMove{entity: *player, source:*player_pos, destination: mouse_pos}));
+                        commands.push((
+                            (),
+                            WantsToMove {
+                                entity: *player,
+                                source: *player_pos,
+                                destination: mouse_pos,
+                            },
+                        ));
                         *turn_state = TurnState::PlayerTurn;
-                    }      
-                },
-                BEvent::KeyboardInput{key: VirtualKeyCode::Key1, pressed:true, ..} => {
-                    commands.push(((), WantsToAttack{attacker: *player, pos: *player_pos}));
+                    }
+                }
+                BEvent::KeyboardInput {
+                    key: VirtualKeyCode::Key1,
+                    pressed: true,
+                    ..
+                } => {
+                    commands.push((
+                        (),
+                        WantsToAttack {
+                            attacker: *player,
+                            pos: *player_pos,
+                        },
+                    ));
                     *turn_state = TurnState::PlayerTargeting;
-                },
+                }
                 _ => {}
             }
         }

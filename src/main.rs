@@ -1,25 +1,25 @@
-mod map;
-mod systems;
-mod map_builder;
 mod components;
-mod turn_state;
+mod map;
+mod map_builder;
 mod movement_range;
+mod systems;
+mod turn_state;
 
 mod prelude {
-    pub use bracket_lib::prelude::*;
-    pub use legion::*;
-    pub use legion::world::SubWorld;
-    pub use legion::systems::CommandBuffer;
-    pub use crate::map::*;
-    pub use crate::systems::*;
-    pub use crate::map_builder::*;
     pub use crate::components::*;
-    pub use crate::turn_state::*;
+    pub use crate::map::*;
+    pub use crate::map_builder::*;
     pub use crate::movement_range::*;
-    pub const SCREEN_HEIGHT:i32 = 60;
-    pub const SCREEN_WIDTH:i32 = 80;
-    pub const ARENA_HEIGHT:usize = 40;
-    pub const ARENA_WIDTH:usize = 40;
+    pub use crate::systems::*;
+    pub use crate::turn_state::*;
+    pub use bracket_lib::prelude::*;
+    pub use legion::systems::CommandBuffer;
+    pub use legion::world::SubWorld;
+    pub use legion::*;
+    pub const SCREEN_HEIGHT: i32 = 60;
+    pub const SCREEN_WIDTH: i32 = 80;
+    pub const ARENA_HEIGHT: usize = 40;
+    pub const ARENA_WIDTH: usize = 40;
 }
 
 use prelude::*;
@@ -62,7 +62,7 @@ impl GameState for State {
             match event {
                 BEvent::CloseRequested => {
                     ctx.quitting = true;
-                },
+                }
                 _ => {
                     input_events.push_back(event);
                 }
@@ -82,12 +82,25 @@ impl GameState for State {
                 self.ecs.push((Player, WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
-                self.round_start_systems.execute(&mut self.ecs, &mut self.resources);
+                self.round_start_systems
+                    .execute(&mut self.ecs, &mut self.resources);
             }
-            TurnState::AwaitingInput => {self.input_systems.execute(&mut self.ecs, &mut self.resources);},
-            TurnState::PlayerTargeting => {self.targeting_systems.execute(&mut self.ecs, &mut self.resources);},
-            TurnState::PlayerTurn => {self.player_systems.execute(&mut self.ecs, &mut self.resources);},
-            TurnState::EnemyTurn => {self.enemy_systems.execute(&mut self.ecs, &mut self.resources);},
+            TurnState::AwaitingInput => {
+                self.input_systems
+                    .execute(&mut self.ecs, &mut self.resources);
+            }
+            TurnState::PlayerTargeting => {
+                self.targeting_systems
+                    .execute(&mut self.ecs, &mut self.resources);
+            }
+            TurnState::PlayerTurn => {
+                self.player_systems
+                    .execute(&mut self.ecs, &mut self.resources);
+            }
+            TurnState::EnemyTurn => {
+                self.enemy_systems
+                    .execute(&mut self.ecs, &mut self.resources);
+            }
         }
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");

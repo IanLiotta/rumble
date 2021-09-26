@@ -8,10 +8,19 @@ pub fn tiles_in_range(map: &Map, range: f32, origin: usize) -> HashSet<usize> {
     result
 }
 
-fn is_tile_in_range(map: &Map, range: f32, origin: usize, cell: usize, solution: &mut HashSet<usize>) {
+fn is_tile_in_range(
+    map: &Map,
+    range: f32,
+    origin: usize,
+    cell: usize,
+    solution: &mut HashSet<usize>,
+) {
     solution.insert(cell);
     for n in Map::get_neighbors(map, cell) {
-        if !solution.contains(&n) && DistanceAlg::Pythagoras.distance2d(Map::map_idx2point(n), Map::map_idx2point(origin)) <= range {
+        if !solution.contains(&n)
+            && DistanceAlg::Pythagoras.distance2d(Map::map_idx2point(n), Map::map_idx2point(origin))
+                <= range
+        {
             is_tile_in_range(map, range, origin, n, solution);
         }
     }
