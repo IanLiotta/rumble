@@ -4,10 +4,15 @@ use crate::prelude::*;
 #[read_component(Point)]
 #[read_component(Render)]
 #[write_component(DrawOffset)]
+#[read_component(FieldOfView)]
+#[read_component(Player)]
 pub fn render_entity(ecs: &mut SubWorld){
+    let mut renderables = <(&Point, &Render, &mut DrawOffset)>::query();
+    let mut fov = <&FieldOfView>::query().filter(component::<Player>());
+    let player_fov = fov.iter(ecs).nth(0).unwrap();
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(1);
-    <(&Point, &Render, &mut DrawOffset)>::query()
+    renderables
         .iter_mut(ecs)
         .for_each(|(pos, render, offset)|{
             let offset_pos_x = pos.x as f32 + offset.offset_x;

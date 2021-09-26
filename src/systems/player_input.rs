@@ -7,6 +7,7 @@ use crate::prelude::*;
 #[system]
 #[read_component(Player)]
 #[read_component(Point)]
+#[read_component(FieldOfView)]
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource]map: &Map,
@@ -24,11 +25,19 @@ pub fn player_input(
     let mut players = mobs.filter(component::<Player>());
     let mouse_pos = input.mouse_tile(0);
     let mouse_idx = Map::map_idx(mouse_pos.x as usize, mouse_pos.y as usize);
+
+    let mut fov = <&FieldOfView>::query().filter(component::<Player>());
+    let player_fov = fov.iter(ecs).nth(0).unwrap();
     // find each player controlled entity
     players.iter(ecs).for_each(|(player, player_pos)| 
     {
         // find the valid moves within the player's movement range
-        let possible_moves = tiles_in_range(map, 10.0, Map::map_idx(player_pos.x as usize, player_pos.y as usize));
+        let mut possible_moves: Vec<usize> = vec![];
+        tiles_in_range(map, 10.0, Map::map_idx(player_pos.x as usize, player_pos.y as usize)).iter().for_each(|tile| {
+            if player_fov.visible_tiles.contains(&Map::map_idx2point(*tile)) {
+                possible_moves.push(*tile);
+            }
+        });
         // queue command to add the MovementRange component to the player entity
         commands.add_component(*player, MovementRange{move_range: possible_moves.clone()});
         // if a valid tile is clicked, queue a message-entity that the player wants to move

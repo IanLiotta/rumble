@@ -24,6 +24,7 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                     },
                     MovementRange {move_range: Vec::new()},
                     Health {hp: 32},
+                    FieldOfView::new(9),
                     )
                 );
                 } else {
@@ -42,6 +43,7 @@ pub fn spawn_mob(player: Option<&Player>, entity: &Entity, _want_spawn: &WantsTo
                         MovementRange {move_range: Vec::new()},
                         Health {hp: 3},
                         MovesRandomly,
+                        FieldOfView::new(9)
                         ),
                     );
                 }
