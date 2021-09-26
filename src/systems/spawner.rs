@@ -52,7 +52,7 @@ pub fn spawn_mob(
                         move_range: Vec::new(),
                     },
                     Health { hp: 3 },
-                    MovesRandomly,
+                    ChasesPlayer,
                     FieldOfView::new(50),
                 ));
             }

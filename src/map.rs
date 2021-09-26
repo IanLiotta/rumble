@@ -74,7 +74,7 @@ impl Map {
         let destination = loc + delta;
         if self.in_bounds(destination) {
             if self.can_enter_tile(destination) {
-                let idx = Map::map_idx(destination.x as usize, destination.y as usize);
+                let idx = self.point2d_to_index(destination);
                 Some(idx)
             } else {
                 None

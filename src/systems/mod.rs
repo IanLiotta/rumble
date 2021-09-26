@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+mod chasing;
 mod damage;
 mod end_turn;
 mod fov;
@@ -50,6 +51,10 @@ pub fn build_player_scheduler() -> Schedule {
         .add_system(render_map::render_map_system())
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
+        .add_system(movement::move_entity_system())
+        .flush()
+        .add_system(map_indexer::map_indexer_system())
+        .flush()
         .add_system(end_turn::end_turn_system())
         .build()
 }
@@ -58,7 +63,8 @@ pub fn build_enemy_scheduler() -> Schedule {
     Schedule::builder()
         .add_system(spawner::spawn_mob_system())
         .flush()
-        .add_system(random_walk::random_walk_system())
+        //.add_system(random_walk::random_walk_system())
+        .add_system(chasing::chasing_system())
         .flush()
         .add_system(movement::move_entity_system())
         .flush()
@@ -67,6 +73,7 @@ pub fn build_enemy_scheduler() -> Schedule {
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
         .add_system(map_indexer::map_indexer_system())
+        .flush()
         .add_system(end_turn::end_turn_system())
         .build()
 }
