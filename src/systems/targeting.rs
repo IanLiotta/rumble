@@ -15,7 +15,7 @@ pub fn targeting(
     <(Entity, &WantsToAttack)>::query().iter(ecs).for_each(|(entity, attacker)| {
         let target_tiles = tiles_in_range(map, 10.0, Map::map_idx(attacker.pos.x as usize, attacker.pos.y as usize));
         // exclude the 0th target_tile, that's the player
-        target_tiles[1..].iter().for_each(|target|{
+        target_tiles.iter().for_each(|target|{
             draw_batch.set(
                 Map::map_idx2point(*target),
                 ColorPair::new(RGBA::from_f32(1.0, 0.0, 0.0, 0.5), BLACK),
