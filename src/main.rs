@@ -20,6 +20,7 @@ mod prelude {
     pub const SCREEN_WIDTH: i32 = 80;
     pub const ARENA_HEIGHT: usize = 40;
     pub const ARENA_WIDTH: usize = 40;
+    pub const FRAME_TIME: f32 = 60.0;
 }
 
 use prelude::*;
@@ -27,6 +28,7 @@ use prelude::*;
 struct State {
     ecs: World,
     resources: Resources,
+    elapsed_frame_time: f32,
     round_start_systems: Schedule,
     input_systems: Schedule,
     targeting_systems: Schedule,
@@ -44,6 +46,7 @@ impl State {
         State {
             ecs: world,
             resources: resources,
+            elapsed_frame_time: 0.0,
             round_start_systems: build_round_start_scheduler(),
             input_systems: build_input_scheduler(),
             targeting_systems: build_targeting_scheduler(),
@@ -56,6 +59,7 @@ impl State {
 impl GameState for State {
     // run by main_loop
     fn tick(&mut self, ctx: &mut BTerm) {
+        self.elapsed_frame_time += ctx.frame_time_ms;
         // watch the input event queue for quit events, pass the rest along to the input system
         let mut input_events = std::collections::VecDeque::<BEvent>::new();
         while let Some(event) = INPUT.lock().pop() {
@@ -102,7 +106,10 @@ impl GameState for State {
                     .execute(&mut self.ecs, &mut self.resources);
             }
         }
-        render_entities(&mut self.ecs, ctx);
+        if self.elapsed_frame_time > FRAME_TIME {
+            render_entities(&mut self.ecs);
+            self.elapsed_frame_time = 0.0;
+        }
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");
     }
@@ -124,18 +131,27 @@ fn main() -> BError {
     main_loop(context, gs)
 }
 
-pub fn render_entities(ecs: &mut World, ctx: &mut BTerm) {
+pub fn render_entities(ecs: &mut World) {
     let mut commands = CommandBuffer::new(ecs);
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(1);
-    let mut renderables = <(Entity, &Point, &Render, Option<&mut IsMoving>)>::query();
+    let mut renderables = <(
+        Entity,
+        &Point,
+        &Render,
+        Option<&mut IsMoving>,
+        Option<&mut FieldOfView>,
+    )>::query();
     for ent in renderables.iter_mut(ecs) {
-        let (entity, pos, render, is_moving) = ent;
+        let (entity, pos, render, is_moving, fov) = ent;
         draw_batch.set(*pos, render.color, render.glyph);
         if let Some(mover) = is_moving {
             commands.add_component(*entity, Map::map_idx2point(mover.path.steps.remove(0)));
             if mover.path.steps.is_empty() {
                 commands.remove_component::<IsMoving>(*entity);
+            }
+            if let Some(fov) = fov {
+                commands.add_component(*entity, fov.clone_dirty());
             }
         }
     }
