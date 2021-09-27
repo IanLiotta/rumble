@@ -142,7 +142,12 @@ pub fn render_entities(ecs: &mut World) {
         Option<&mut IsMoving>,
         Option<&mut FieldOfView>,
     )>::query();
-    for ent in renderables.iter_mut(ecs) {
+    let mut fov = <&FieldOfView>::query().filter(component::<Player>());
+    let player_fov = fov.iter(ecs).nth(0).unwrap().clone();
+    for ent in renderables
+        .iter_mut(ecs)
+        .filter(|(_, pos, _, _, _)| player_fov.visible_tiles.contains(pos))
+    {
         let (entity, pos, render, is_moving, fov) = ent;
         draw_batch.set(*pos, render.color, render.glyph);
         if let Some(mover) = is_moving {

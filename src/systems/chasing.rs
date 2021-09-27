@@ -5,8 +5,9 @@ use crate::prelude::*;
 #[read_component(ChasesPlayer)]
 #[read_component(Health)]
 #[read_component(Player)]
+#[read_component(FieldOfView)]
 pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuffer) {
-    let mut movers = <(Entity, &Point, &ChasesPlayer)>::query();
+    let mut movers = <(Entity, &Point, &ChasesPlayer, &FieldOfView)>::query();
     //let mut positions = <(Entity, &Point, &Health)>::query();
     let mut player = <(&Point, &Player)>::query();
 
@@ -15,20 +16,37 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
 
     let search_targets = vec![player_idx];
     let dijkstra_map = DijkstraMap::new(ARENA_WIDTH, ARENA_HEIGHT, &search_targets, map, 1024.0);
-
-    movers.iter(ecs).for_each(|(entity, pos, _)| {
+    movers.iter(ecs).for_each(|(entity, pos, _, fov)| {
         let idx = Map::map_idx(pos.x as usize, pos.y as usize);
-        if let Some(destination) = DijkstraMap::find_lowest_exit(&dijkstra_map, idx, map) {
-            let distance = DistanceAlg::Pythagoras.distance2d(*pos, *player_pos);
-            if distance > 1.2 {
-                let destination_pt = Map::map_idx2point(destination);
-                if map.tile_contents[destination].is_empty() {
+        let mut possible_moves: Vec<usize> = vec![];
+        tiles_in_range(map, 3.0, idx).iter().for_each(|tile| {
+            if fov.visible_tiles.contains(&Map::map_idx2point(*tile)) {
+                possible_moves.push(*tile);
+            }
+        });
+        // queue command to add the MovementRange component to the enemy entity
+        commands.add_component(
+            *entity,
+            MovementRange {
+                move_range: possible_moves.clone(),
+            },
+        );
+        let mut dest_found = false;
+        let mut current_step = idx;
+        let mut destination = 0;
+        while !dest_found {
+            if let Some(step) = DijkstraMap::find_lowest_exit(&dijkstra_map, current_step, map) {
+                if possible_moves.contains(&step) {
+                    destination = step;
+                    current_step = step;
+                } else {
+                    dest_found = true;
                     commands.push((
                         (),
                         WantsToMove {
                             entity: *entity,
-                            source: *pos,
-                            destination: destination_pt,
+                            source: Map::map_idx2point(idx),
+                            destination: Map::map_idx2point(destination),
                         },
                     ));
                 }
