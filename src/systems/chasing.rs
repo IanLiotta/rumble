@@ -36,7 +36,9 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
         let mut destination = 0;
         while !dest_found {
             if let Some(step) = DijkstraMap::find_lowest_exit(&dijkstra_map, current_step, map) {
-                if possible_moves.contains(&step) {
+                let distance =
+                    DistanceAlg::Pythagoras.distance2d(Map::map_idx2point(step), *player_pos);
+                if distance > 1.4 && possible_moves.contains(&step) {
                     destination = step;
                     current_step = step;
                 } else {
