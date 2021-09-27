@@ -35,6 +35,10 @@ pub struct WantsToMove {
     pub destination: Point,
 }
 
+pub struct IsMoving {
+    pub path: NavigationPath,
+}
+
 pub struct WantsToAttack {
     pub attacker: Entity,
     pub pos: Point,

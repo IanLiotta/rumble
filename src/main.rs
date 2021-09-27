@@ -102,6 +102,7 @@ impl GameState for State {
                     .execute(&mut self.ecs, &mut self.resources);
             }
         }
+        render_entities(&mut self.ecs, ctx);
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");
     }
@@ -121,4 +122,23 @@ fn main() -> BError {
         .build()?;
     let gs = State::new();
     main_loop(context, gs)
+}
+
+pub fn render_entities(ecs: &mut World, ctx: &mut BTerm) {
+    let mut commands = CommandBuffer::new(ecs);
+    let mut draw_batch = DrawBatch::new();
+    draw_batch.target(1);
+    let mut renderables = <(Entity, &Point, &Render, Option<&mut IsMoving>)>::query();
+    for ent in renderables.iter_mut(ecs) {
+        let (entity, pos, render, is_moving) = ent;
+        draw_batch.set(*pos, render.color, render.glyph);
+        if let Some(mover) = is_moving {
+            commands.add_component(*entity, Map::map_idx2point(mover.path.steps.remove(0)));
+            if mover.path.steps.is_empty() {
+                commands.remove_component::<IsMoving>(*entity);
+            }
+        }
+    }
+    commands.flush(ecs);
+    draw_batch.submit(2100).expect("Batch error");
 }

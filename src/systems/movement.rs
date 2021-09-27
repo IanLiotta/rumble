@@ -18,10 +18,19 @@ pub fn move_entity(
         }
     }
     if map.can_enter_tile(want_move.destination) {
-        let offset_x = (want_move.source.x - want_move.destination.x) as f32;
-        let offset_y = (want_move.source.y - want_move.destination.y) as f32;
-        commands.add_component(want_move.entity, want_move.destination);
-        commands.add_component(want_move.entity, DrawOffset { offset_x, offset_y });
+        let path = a_star_search(
+            Map::map_idx(want_move.source.x as usize, want_move.source.y as usize),
+            Map::map_idx(
+                want_move.destination.x as usize,
+                want_move.destination.y as usize,
+            ),
+            map,
+        );
+        commands.add_component(want_move.entity, IsMoving { path });
+        //let offset_x = (want_move.source.x - want_move.destination.x) as f32;
+        //let offset_y = (want_move.source.y - want_move.destination.y) as f32;
+        //commands.add_component(want_move.entity, want_move.destination);
+        //commands.add_component(want_move.entity, DrawOffset { offset_x, offset_y });
     }
     commands.remove(*entity);
 }
