@@ -38,6 +38,8 @@ pub fn build_input_scheduler() -> Schedule {
 pub fn build_targeting_scheduler() -> Schedule {
     Schedule::builder()
         .add_system(fov::fov_system())
+        .add_system(map_indexer::map_indexer_system())
+        .flush()
         .add_system(render_map::render_map_system())
         //.add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
