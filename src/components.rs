@@ -43,6 +43,12 @@ pub struct WantsToAttack {}
 
 pub struct DirectDamage {
     pub amount: i32,
+    pub source: Point,
+}
+
+pub struct DrawLine {
+    pub source: Point,
+    pub dest: Point,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

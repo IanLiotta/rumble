@@ -108,6 +108,7 @@ impl GameState for State {
         }
         if self.elapsed_frame_time > FRAME_TIME {
             render_entities(&mut self.ecs);
+            render_attacks(&mut self.ecs);
             self.elapsed_frame_time = 0.0;
         }
         //draw the buffer constructed in multiple places elsewhere
@@ -162,4 +163,20 @@ pub fn render_entities(ecs: &mut World) {
     }
     commands.flush(ecs);
     draw_batch.submit(2100).expect("Batch error");
+}
+
+pub fn render_attacks(ecs: &mut World) {
+    let mut commands = CommandBuffer::new(ecs);
+    let mut draw_batch = DrawBatch::new();
+    draw_batch.target(2);
+    <(Entity, &DrawLine)>::query()
+        .iter(ecs)
+        .for_each(|(entity, line)| {
+            Bresenham::new(line.source, line.dest).for_each(|point| {
+                draw_batch.set(point, ColorPair::new(RED, BLACK), to_cp437('+'));
+            });
+            commands.remove(*entity);
+        });
+    commands.flush(ecs);
+    draw_batch.submit(3000).expect("Batch error");
 }

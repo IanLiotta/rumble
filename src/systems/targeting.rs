@@ -44,7 +44,20 @@ pub fn targeting(
                             //Find if there's anything in the target tile and tag it to take damage
                             let entities = &map.tile_contents[mouse_idx];
                             for entity in entities.iter() {
-                                commands.add_component(*entity, DirectDamage { amount: 10 });
+                                commands.push((
+                                    (),
+                                    DrawLine {
+                                        source: *pos,
+                                        dest: mouse_pos,
+                                    },
+                                ));
+                                commands.add_component(
+                                    *entity,
+                                    DirectDamage {
+                                        amount: 10,
+                                        source: *pos,
+                                    },
+                                );
                             }
                             commands.remove_component::<WantsToAttack>(*entity);
                             *turn_state = TurnState::EnemyTurn;
