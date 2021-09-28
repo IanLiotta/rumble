@@ -24,6 +24,7 @@ mod prelude {
 }
 
 use prelude::*;
+use std::{thread, time};
 
 struct State {
     ecs: World,
@@ -108,9 +109,9 @@ impl GameState for State {
         }
         if self.elapsed_frame_time > FRAME_TIME {
             render_entities(&mut self.ecs);
-            render_attacks(&mut self.ecs);
             self.elapsed_frame_time = 0.0;
         }
+        render_attacks(&mut self.ecs);
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");
     }
@@ -170,13 +171,24 @@ pub fn render_attacks(ecs: &mut World) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
     <(Entity, &DrawLine)>::query()
-        .iter(ecs)
+        .iter_mut(ecs)
         .for_each(|(entity, line)| {
             Bresenham::new(line.source, line.dest).for_each(|point| {
                 draw_batch.set(point, ColorPair::new(RED, BLACK), to_cp437('+'));
             });
-            commands.remove(*entity);
+            if line.duration == 0 {
+                commands.remove(*entity);
+            } else {
+                commands.add_component(
+                    *entity,
+                    DrawLine {
+                        source: line.source,
+                        dest: line.dest,
+                        duration: line.duration - 1,
+                    },
+                );
+            }
+            draw_batch.submit(3000).expect("Batch error");
         });
     commands.flush(ecs);
-    draw_batch.submit(3000).expect("Batch error");
 }

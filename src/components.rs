@@ -49,6 +49,7 @@ pub struct DirectDamage {
 pub struct DrawLine {
     pub source: Point,
     pub dest: Point,
+    pub duration: usize,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -49,6 +49,7 @@ pub fn targeting(
                                     DrawLine {
                                         source: *pos,
                                         dest: mouse_pos,
+                                        duration: 10,
                                     },
                                 ));
                                 commands.add_component(
