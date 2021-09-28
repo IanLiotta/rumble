@@ -39,10 +39,7 @@ pub struct IsMoving {
     pub path: NavigationPath,
 }
 
-pub struct WantsToAttack {
-    pub attacker: Entity,
-    pub pos: Point,
-}
+pub struct WantsToAttack {}
 
 pub struct DirectDamage {
     pub amount: i32,

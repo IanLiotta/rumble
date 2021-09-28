@@ -73,13 +73,7 @@ pub fn player_input(
                     pressed: true,
                     ..
                 } => {
-                    commands.push((
-                        (),
-                        WantsToAttack {
-                            attacker: *player,
-                            pos: *player_pos,
-                        },
-                    ));
+                    commands.add_component(*player, WantsToAttack {});
                     *turn_state = TurnState::PlayerTargeting;
                 }
                 _ => {}

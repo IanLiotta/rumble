@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[system]
 #[read_component(WantsToAttack)]
 #[read_component(Point)]
+#[read_component(FieldOfView)]
 pub fn targeting(
     ecs: &mut SubWorld,
     commands: &mut CommandBuffer,
@@ -12,14 +13,14 @@ pub fn targeting(
 ) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
-    <(Entity, &WantsToAttack)>::query()
+    <(Entity, &WantsToAttack, &Point, &FieldOfView)>::query()
         .iter(ecs)
-        .for_each(|(entity, attacker)| {
-            let target_tiles = tiles_in_range(
-                map,
-                10.0,
-                Map::map_idx(attacker.pos.x as usize, attacker.pos.y as usize),
-            );
+        .for_each(|(entity, _, pos, fov)| {
+            let target_tiles =
+                tiles_in_range(map, 10.0, Map::map_idx(pos.x as usize, pos.y as usize))
+                    .into_iter()
+                    .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
+                    .collect::<Vec<usize>>();
             // exclude the 0th target_tile, that's the player
             target_tiles.iter().for_each(|target| {
                 draw_batch.set(
@@ -43,12 +44,12 @@ pub fn targeting(
                             //Find if there's anything in the target tile and tag it to take damage
                             let entities = &map.tile_contents[mouse_idx];
                             for entity in entities.iter() {
-                                commands.add_component(*entity, DirectDamage { amount: 1 });
+                                commands.add_component(*entity, DirectDamage { amount: 10 });
                             }
-                            commands.remove(*entity);
+                            commands.remove_component::<WantsToAttack>(*entity);
                             *turn_state = TurnState::EnemyTurn;
                         } else {
-                            commands.remove(*entity);
+                            commands.remove_component::<WantsToAttack>(*entity);
                             *turn_state = TurnState::AwaitingInput;
                         }
                     }
