@@ -3,6 +3,7 @@ use crate::prelude::*;
 mod chasing;
 mod damage;
 mod end_turn;
+mod enemy_attack;
 mod fov;
 mod map_indexer;
 mod movement;
@@ -73,6 +74,7 @@ pub fn build_enemy_scheduler() -> Schedule {
         .add_system(movement::move_entity_system())
         .flush()
         .add_system(fov::fov_system())
+        .add_system(enemy_attack::enemy_attack_system())
         .add_system(render_map::render_map_system())
         //.add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())

@@ -24,7 +24,6 @@ mod prelude {
 }
 
 use prelude::*;
-use std::{thread, time};
 
 struct State {
     ecs: World,
