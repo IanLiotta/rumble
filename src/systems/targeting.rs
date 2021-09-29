@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+//TODO: Replace this with a component value later
+const PLAYER_TARGETING_RANGE: f32 = 5.0;
 #[system]
 #[read_component(WantsToAttack)]
 #[read_component(Point)]
@@ -16,11 +18,14 @@ pub fn targeting(
     <(Entity, &WantsToAttack, &Point, &FieldOfView)>::query()
         .iter(ecs)
         .for_each(|(entity, _, pos, fov)| {
-            let target_tiles =
-                tiles_in_range(map, 10.0, Map::map_idx(pos.x as usize, pos.y as usize))
-                    .into_iter()
-                    .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
-                    .collect::<Vec<usize>>();
+            let target_tiles = tiles_in_range(
+                map,
+                PLAYER_TARGETING_RANGE,
+                Map::map_idx(pos.x as usize, pos.y as usize),
+            )
+            .into_iter()
+            .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
+            .collect::<Vec<usize>>();
             // exclude the 0th target_tile, that's the player
             target_tiles.iter().for_each(|target| {
                 draw_batch.set(

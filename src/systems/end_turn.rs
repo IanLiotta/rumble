@@ -10,8 +10,22 @@ pub fn end_turn(ecs: &SubWorld, #[resource] turn_state: &mut TurnState) {
         TurnState::StartGame => TurnState::AwaitingInput,
         TurnState::AwaitingInput => return,
         TurnState::PlayerTargeting => TurnState::EnemyTurn,
-        TurnState::PlayerTurn => TurnState::EnemyTurn,
-        TurnState::EnemyTurn => TurnState::AwaitingInput,
+        TurnState::PlayerTurn => {
+            let mut movers = <&IsMoving>::query();
+            if movers.iter(ecs).peekable().peek().is_some() {
+                TurnState::PlayerTurn
+            } else {
+                TurnState::EnemyTurn
+            }
+        }
+        TurnState::EnemyTurn => {
+            let mut movers = <&IsMoving>::query();
+            if movers.iter(ecs).peekable().peek().is_some() {
+                TurnState::EnemyTurn
+            } else {
+                TurnState::AwaitingInput
+            }
+        }
     };
 
     *turn_state = new_state;

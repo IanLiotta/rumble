@@ -73,6 +73,7 @@ impl GameState for State {
             }
         }
         self.resources.insert(input_events);
+        //if self.elapsed_frame_time > FRAME_TIME {
         ctx.set_active_console(0);
         ctx.cls();
         ctx.set_active_console(1);
@@ -106,10 +107,10 @@ impl GameState for State {
                     .execute(&mut self.ecs, &mut self.resources);
             }
         }
-        if self.elapsed_frame_time > FRAME_TIME {
-            render_entities(&mut self.ecs);
-            self.elapsed_frame_time = 0.0;
-        }
+        //if self.elapsed_frame_time > FRAME_TIME {
+        //render_entities(&mut self.ecs);
+        //self.elapsed_frame_time = 0.0;
+        //}
         render_attacks(&mut self.ecs);
         //draw the buffer constructed in multiple places elsewhere
         render_draw_buffer(ctx).expect("Render error");
@@ -151,6 +152,8 @@ pub fn render_entities(ecs: &mut World) {
     {
         let (entity, pos, render, is_moving, fov) = ent;
         draw_batch.set(*pos, render.color, render.glyph);
+        // enemies are moving on top of each other because we're not checking if the desired tile
+        // is empty here. Get access to map and check map.tile_contents[next_step].is_empty()
         if let Some(mover) = is_moving {
             commands.add_component(*entity, Map::map_idx2point(mover.path.steps.remove(0)));
             if mover.path.steps.is_empty() {

@@ -3,6 +3,8 @@
 // and add it as a component to the player entity
 
 use crate::prelude::*;
+//replace this with a component value later
+const PLAYER_MOVE_RANGE: f32 = 4.0;
 
 #[system]
 #[read_component(Player)]
@@ -33,7 +35,7 @@ pub fn player_input(
         let mut possible_moves: Vec<usize> = vec![];
         tiles_in_range(
             map,
-            10.0,
+            PLAYER_MOVE_RANGE,
             Map::map_idx(player_pos.x as usize, player_pos.y as usize),
         )
         .iter()

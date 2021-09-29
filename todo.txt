@@ -1,5 +1,3 @@
 message log
 add sprites
-enemy attacks
-attack animations
-targeting obeys FOV
+
