@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+//this should be part of a component
+const ENEMY_SIGHT_RADIUS: f32 = 5.0;
+
 #[system]
 #[read_component(Point)]
 #[read_component(Enemy)]
@@ -12,14 +15,21 @@ pub fn enemy_attack(ecs: &SubWorld, #[resource] map: &Map, commands: &mut Comman
             // get a list of other entities inside FOV
             // if there's more than one, roll to pick a random one
             // blat blat
-            let target_tiles =
-                tiles_in_range(map, 5.0, Map::map_idx(pos.x as usize, pos.y as usize))
-                    .into_iter()
-                    .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
-                    .collect::<Vec<usize>>();
+            let target_tiles = tiles_in_range(
+                map,
+                ENEMY_SIGHT_RADIUS,
+                Map::map_idx(pos.x as usize, pos.y as usize),
+            )
+            .into_iter()
+            .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
+            .collect::<Vec<usize>>();
             let targets: Vec<&usize> = target_tiles
                 .iter()
-                .filter(|tile| !map.tile_contents[**tile].is_empty())
+                .filter(|tile| {
+                    !map.tile_contents[**tile].is_empty()
+                        && **tile != Map::map_idx(pos.x as usize, pos.y as usize)
+                    // don't shoot yourself
+                })
                 .collect();
             if targets.len() >= 1 {
                 let mut rng = RandomNumberGenerator::new();

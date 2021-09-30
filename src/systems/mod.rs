@@ -3,6 +3,7 @@ use crate::prelude::*;
 mod chasing;
 mod damage;
 mod end_turn;
+mod enemy_ai;
 mod enemy_attack;
 mod fov;
 mod map_indexer;
@@ -52,15 +53,16 @@ pub fn build_targeting_scheduler() -> Schedule {
 
 pub fn build_player_scheduler() -> Schedule {
     Schedule::builder()
-        .add_system(fov::fov_system())
-        .add_system(render_map::render_map_system())
-        .add_system(render_entity::render_entity_system())
-        .add_system(render_hud::render_hud_system())
         .add_system(movement::move_entity_system())
         .flush()
         .add_system(map_indexer::map_indexer_system())
         .flush()
+        .add_system(fov::fov_system())
+        .add_system(render_map::render_map_system())
+        .add_system(render_entity::render_entity_system())
+        .add_system(render_hud::render_hud_system())
         .add_system(end_turn::end_turn_system())
+        .flush()
         .build()
 }
 
@@ -68,18 +70,21 @@ pub fn build_enemy_scheduler() -> Schedule {
     Schedule::builder()
         .add_system(spawner::spawn_mob_system())
         .flush()
-        //.add_system(random_walk::random_walk_system())
-        .add_system(chasing::chasing_system())
+        .add_system(enemy_ai::enemy_ai_system())
         .flush()
+        .add_system(damage::damage_system())
+        //.add_system(random_walk::random_walk_system())
+        //.add_system(chasing::chasing_system())
+        //.flush()
         .add_system(movement::move_entity_system())
+        .flush()
+        .add_system(map_indexer::map_indexer_system())
         .flush()
         .add_system(fov::fov_system())
         //.add_system(enemy_attack::enemy_attack_system())
         .add_system(render_map::render_map_system())
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
-        .add_system(map_indexer::map_indexer_system())
-        .flush()
         .add_system(end_turn::end_turn_system())
         .build()
 }

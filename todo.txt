@@ -1,3 +1,4 @@
 message log
 add sprites
 
+make enemy only move or attack, not both.
