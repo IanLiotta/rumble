@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use legion::world::*;
 
 #[system]
 #[read_component(Point)]
@@ -7,100 +8,98 @@ use crate::prelude::*;
 #[read_component(IsMoving)]
 #[read_component(ChasesPlayer)]
 #[read_component(Player)]
-pub fn enemy_ai(ecs: &SubWorld, commands: &mut CommandBuffer, #[resource] map: &Map) {
+pub fn enemy_ai(
+    ecs: &SubWorld,
+    commands: &mut CommandBuffer,
+    #[resource] map: &Map,
+    #[resource] turn_queue: &TurnQueue,
+) {
+    // TODO: Refactor all this to use the Turn Queue instead of letting everyone go at once.
     // Get the list of enemies
     // If the enemy IsMoving, do nothing - movement system will take care of it
     // Otherwise, look for another entity. If they're in your attack range, attack, otherwise move
-    let mut enemies =
-        <(Entity, &Point, Option<&IsMoving>, &FieldOfView)>::query().filter(component::<Enemy>());
-    enemies.iter(ecs).for_each(|(entity, pos, is_moving, fov)| {
-        if let Some(_is_moving) = is_moving {
+    let enemy_entity = turn_queue.current.unwrap();
+    let enemy_entry = ecs.entry_ref(enemy_entity).unwrap();
+    if let Ok(_is_moving) = enemy_entry.get_component::<IsMoving>() {
+        return;
+    } else {
+        let pos = enemy_entry.get_component::<Point>().unwrap();
+        let fov = enemy_entry.get_component::<FieldOfView>().unwrap();
+        if enemy_attack(map, commands, pos, fov) {
             return;
         } else {
-            if enemy_attack(ecs, map, commands, entity, pos, fov) {
-                return;
-            } else {
-                chasing(ecs, map, commands);
-            }
+            chasing(ecs, enemy_entity, map, commands);
         }
-    });
+    }
 }
 
-fn chasing(ecs: &SubWorld, map: &Map, commands: &mut CommandBuffer) {
-    let mut movers = <(
-        Entity,
-        &Point,
-        &ChasesPlayer,
-        &FieldOfView,
-        Option<&IsMoving>,
-    )>::query();
-    //let mut positions = <(Entity, &Point, &Health)>::query();
+fn chasing(ecs: &SubWorld, enemy: Entity, map: &Map, commands: &mut CommandBuffer) {
+    // get the entry for our enemy
+    let enemy_entry = ecs.entry_ref(enemy).unwrap();
+    // If this enemy is already on the move, don't continue
+    if let Ok(_is_moving) = enemy_entry.get_component::<IsMoving>() {
+        return;
+    }
+    // find where the player is
     let mut player = <(&Point, &Player)>::query();
-
     let player_pos = player.iter(ecs).nth(0).unwrap().0;
     let player_idx = Map::map_idx(player_pos.x as usize, player_pos.y as usize);
-
+    // generate the dijkstra map
     let search_targets = vec![player_idx];
     let dijkstra_map = DijkstraMap::new(ARENA_WIDTH, ARENA_HEIGHT, &search_targets, map, 1024.0);
-    movers
-        .iter(ecs)
-        .for_each(|(entity, pos, _, fov, is_moving)| {
-            // If this enemy is already on the move, don't continue
-            if let Some(_is_moving) = is_moving {
-                return;
+    // get the info about our enemy we'll need
+    let pos = enemy_entry.get_component::<Point>().unwrap();
+    let fov = enemy_entry.get_component::<FieldOfView>().unwrap();
+    let idx = Map::map_idx(pos.x as usize, pos.y as usize);
+    // figure out where the enemy is able to move to
+    let mut possible_moves: Vec<usize> = vec![];
+    tiles_in_range(map, 3.0, idx).iter().for_each(|tile| {
+        //only try to move onto visible, empty tiles
+        if fov.visible_tiles.contains(&Map::map_idx2point(*tile))
+            && map.tile_contents[*tile].is_empty()
+        {
+            possible_moves.push(*tile);
+        }
+    });
+    // queue command to add those possible moves to the enemy
+    commands.add_component(
+        enemy,
+        MovementRange {
+            move_range: possible_moves.clone(),
+        },
+    );
+    // start searching for our path to the player
+    let mut dest_found = false;
+    let mut current_step = idx;
+    let mut destination = 0;
+    while !dest_found {
+        if let Some(step) = DijkstraMap::find_lowest_exit(&dijkstra_map, current_step, map) {
+            let distance =
+                DistanceAlg::Pythagoras.distance2d(Map::map_idx2point(step), *player_pos);
+            if distance > 1.4 && possible_moves.contains(&step) {
+                destination = step;
+                current_step = step;
+            } else {
+                dest_found = true;
+                commands.push((
+                    (),
+                    WantsToMove {
+                        entity: enemy,
+                        source: Map::map_idx2point(idx),
+                        destination: Map::map_idx2point(destination),
+                    },
+                ));
             }
-            let idx = Map::map_idx(pos.x as usize, pos.y as usize);
-            let mut possible_moves: Vec<usize> = vec![];
-            tiles_in_range(map, 3.0, idx).iter().for_each(|tile| {
-                //only try to move onto visible, empty tiles
-                if fov.visible_tiles.contains(&Map::map_idx2point(*tile))
-                    && map.tile_contents[*tile].is_empty()
-                {
-                    possible_moves.push(*tile);
-                }
-            });
-            // queue command to add the MovementRange component to the enemy entity
-            commands.add_component(
-                *entity,
-                MovementRange {
-                    move_range: possible_moves.clone(),
-                },
-            );
-            let mut dest_found = false;
-            let mut current_step = idx;
-            let mut destination = 0;
-            while !dest_found {
-                if let Some(step) = DijkstraMap::find_lowest_exit(&dijkstra_map, current_step, map)
-                {
-                    let distance =
-                        DistanceAlg::Pythagoras.distance2d(Map::map_idx2point(step), *player_pos);
-                    if distance > 1.4 && possible_moves.contains(&step) {
-                        destination = step;
-                        current_step = step;
-                    } else {
-                        dest_found = true;
-                        commands.push((
-                            (),
-                            WantsToMove {
-                                entity: *entity,
-                                source: Map::map_idx2point(idx),
-                                destination: Map::map_idx2point(destination),
-                            },
-                        ));
-                    }
-                }
-            }
-        });
+        }
+    }
 }
 
 //this should be part of a component
 const ENEMY_SIGHT_RADIUS: f32 = 5.0;
 
 pub fn enemy_attack(
-    ecs: &SubWorld,
     map: &Map,
     commands: &mut CommandBuffer,
-    entity: &Entity,
     pos: &Point,
     fov: &FieldOfView,
 ) -> bool {

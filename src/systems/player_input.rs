@@ -14,6 +14,7 @@ pub fn player_input(
     ecs: &mut SubWorld,
     #[resource] map: &Map,
     #[resource] turn_state: &mut TurnState,
+    #[resource] turn_queue: &TurnQueue,
     #[resource] input_events: &mut std::collections::VecDeque<BEvent>,
     commands: &mut CommandBuffer,
 ) {
@@ -23,14 +24,17 @@ pub fn player_input(
     mobs.iter(ecs).for_each(|(_, mob_point)| {
         mobs_idx.push(Map::map_idx(mob_point.x as usize, mob_point.y as usize));
     });
-    let mut players = mobs.filter(component::<Player>());
+    //let mut players = mobs.filter(component::<Player>());
     let mouse_pos = input.mouse_tile(0);
     let mouse_idx = Map::map_idx(mouse_pos.x as usize, mouse_pos.y as usize);
 
-    let mut fov = <&FieldOfView>::query().filter(component::<Player>());
-    let player_fov = fov.iter(ecs).nth(0).unwrap();
+    //let mut fov = <&FieldOfView>::query().filter(component::<Player>());
+    //let player_fov = fov.iter(ecs).nth(0).unwrap();
     // find each player controlled entity
-    players.iter(ecs).for_each(|(player, player_pos)| {
+    if let Some(player_entity) = turn_queue.current {
+        let player_entry = ecs.entry_ref(player_entity).unwrap();
+        let player_pos = player_entry.get_component::<Point>().unwrap();
+        let player_fov = player_entry.get_component::<FieldOfView>().unwrap();
         // find the valid moves within the player's movement range
         let mut possible_moves: Vec<usize> = vec![];
         tiles_in_range(
@@ -47,9 +51,21 @@ pub fn player_input(
                 possible_moves.push(*tile);
             }
         });
+        // Draw the mouse cursor
+        if possible_moves.contains(&mouse_idx) {
+            let mut draw_batch = DrawBatch::new();
+            draw_batch.target(2);
+            draw_batch.set(
+                mouse_pos,
+                ColorPair::new(RGBA::from_f32(0.0, 1.0, 0.0, 0.8), BLACK),
+                to_cp437('X'),
+            );
+            draw_batch.submit(2200).expect("Batch error");
+        }
+
         // queue command to add the MovementRange component to the player entity
         commands.add_component(
-            *player,
+            player_entity,
             MovementRange {
                 move_range: possible_moves.clone(),
             },
@@ -62,7 +78,7 @@ pub fn player_input(
                         commands.push((
                             (),
                             WantsToMove {
-                                entity: *player,
+                                entity: player_entity,
                                 source: *player_pos,
                                 destination: mouse_pos,
                             },
@@ -75,11 +91,13 @@ pub fn player_input(
                     pressed: true,
                     ..
                 } => {
-                    commands.add_component(*player, WantsToAttack {});
+                    commands.add_component(player_entity, WantsToAttack {});
                     *turn_state = TurnState::PlayerTargeting;
                 }
                 _ => {}
             }
         }
-    });
+    } else {
+        *turn_state = TurnState::EnemyTurn;
+    }
 }

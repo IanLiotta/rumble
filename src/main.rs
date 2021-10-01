@@ -3,6 +3,7 @@ mod map;
 mod map_builder;
 mod movement_range;
 mod systems;
+mod turn_queue;
 mod turn_state;
 
 mod prelude {
@@ -11,11 +12,13 @@ mod prelude {
     pub use crate::map_builder::*;
     pub use crate::movement_range::*;
     pub use crate::systems::*;
+    pub use crate::turn_queue::*;
     pub use crate::turn_state::*;
     pub use bracket_lib::prelude::*;
     pub use legion::systems::CommandBuffer;
     pub use legion::world::SubWorld;
     pub use legion::*;
+    pub use std::collections::VecDeque;
     pub const SCREEN_HEIGHT: i32 = 60;
     pub const SCREEN_WIDTH: i32 = 80;
     pub const ARENA_HEIGHT: usize = 40;
@@ -43,6 +46,10 @@ impl State {
         let mb = MapBuilder::new();
         resources.insert(mb.map);
         resources.insert(TurnState::StartGame);
+        resources.insert(TurnQueue {
+            queue: VecDeque::new(),
+            current: None,
+        });
         State {
             ecs: world,
             resources: resources,

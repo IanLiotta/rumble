@@ -8,6 +8,7 @@ pub fn spawn_mob(
     entity: &Entity,
     _want_spawn: &WantsToSpawn,
     #[resource] map: &Map,
+    #[resource] turn_queue: &mut TurnQueue,
     commands: &mut CommandBuffer,
 ) {
     let mut rng = RandomNumberGenerator::new();
@@ -19,7 +20,7 @@ pub fn spawn_mob(
         );
         if map.tiles[loc] == TileType::Floor {
             if let Some(_player) = player {
-                commands.push((
+                turn_queue.queue.push_back(commands.push((
                     Player,
                     Map::map_idx2point(loc),
                     Render {
@@ -35,9 +36,10 @@ pub fn spawn_mob(
                     },
                     Health { hp: 32 },
                     FieldOfView::new(50),
-                ));
+                )));
+                turn_queue.current = turn_queue.queue.pop_front();
             } else {
-                commands.push((
+                turn_queue.queue.push_back(commands.push((
                     Enemy,
                     Map::map_idx2point(loc),
                     Render {
@@ -54,7 +56,7 @@ pub fn spawn_mob(
                     Health { hp: 3 },
                     ChasesPlayer,
                     FieldOfView::new(50),
-                ));
+                )));
             }
 
             mob_placed = true;

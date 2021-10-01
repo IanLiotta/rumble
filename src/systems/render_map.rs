@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[read_component(Player)]
 #[read_component(MovementRange)]
 #[read_component(FieldOfView)]
-pub fn render_map(ecs: &SubWorld, #[resource] map: &Map, #[resource] turn_state: &TurnState) {
+pub fn render_map(ecs: &SubWorld, #[resource] map: &Map) {
     let mut fov = <&FieldOfView>::query().filter(component::<Player>());
     let player_fov = fov.iter(ecs).nth(0).unwrap();
     let mut draw_batch = DrawBatch::new();
