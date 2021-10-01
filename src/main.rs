@@ -37,6 +37,7 @@ struct State {
     targeting_systems: Schedule,
     player_systems: Schedule,
     enemy_systems: Schedule,
+    game_over_systems: Schedule,
 }
 
 impl State {
@@ -48,7 +49,6 @@ impl State {
         resources.insert(TurnState::StartGame);
         resources.insert(TurnQueue {
             queue: VecDeque::new(),
-            current: None,
         });
         State {
             ecs: world,
@@ -59,6 +59,7 @@ impl State {
             targeting_systems: build_targeting_scheduler(),
             player_systems: build_player_scheduler(),
             enemy_systems: build_enemy_scheduler(),
+            game_over_systems: build_game_over_scheduler(),
         }
     }
 }
@@ -93,7 +94,7 @@ impl GameState for State {
                 // Move these mob creations into the round start system eventually
                 self.ecs.push((Player, WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
-                self.ecs.push(((), WantsToSpawn));
+                //self.ecs.push(((), WantsToSpawn));
                 self.round_start_systems
                     .execute(&mut self.ecs, &mut self.resources);
             }
@@ -111,6 +112,10 @@ impl GameState for State {
             }
             TurnState::EnemyTurn => {
                 self.enemy_systems
+                    .execute(&mut self.ecs, &mut self.resources);
+            }
+            TurnState::GameOver => {
+                self.game_over_systems
                     .execute(&mut self.ecs, &mut self.resources);
             }
         }

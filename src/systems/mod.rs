@@ -6,6 +6,7 @@ mod end_turn;
 mod enemy_ai;
 mod enemy_attack;
 mod fov;
+mod game_over;
 mod map_indexer;
 mod movement;
 mod player_input;
@@ -34,6 +35,7 @@ pub fn build_input_scheduler() -> Schedule {
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
         .add_system(player_input::player_input_system())
+        .add_system(end_turn::end_turn_system())
         .build()
 }
 
@@ -48,6 +50,7 @@ pub fn build_targeting_scheduler() -> Schedule {
         .add_system(targeting::targeting_system())
         .flush()
         .add_system(damage::damage_system())
+        .add_system(end_turn::end_turn_system())
         .build()
 }
 
@@ -73,6 +76,7 @@ pub fn build_enemy_scheduler() -> Schedule {
         .add_system(enemy_ai::enemy_ai_system())
         .flush()
         .add_system(damage::damage_system())
+        .flush()
         .add_system(movement::move_entity_system())
         .flush()
         .add_system(map_indexer::map_indexer_system())
@@ -82,5 +86,12 @@ pub fn build_enemy_scheduler() -> Schedule {
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
         .add_system(end_turn::end_turn_system())
+        .build()
+}
+
+pub fn build_game_over_scheduler() -> Schedule {
+    Schedule::builder()
+        .add_system(render_hud::render_hud_system())
+        .add_system(game_over::game_over_system())
         .build()
 }

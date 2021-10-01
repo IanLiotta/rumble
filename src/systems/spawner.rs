@@ -37,7 +37,6 @@ pub fn spawn_mob(
                     Health { hp: 32 },
                     FieldOfView::new(50),
                 )));
-                turn_queue.current = turn_queue.queue.pop_front();
             } else {
                 turn_queue.queue.push_back(commands.push((
                     Enemy,

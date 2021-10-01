@@ -14,21 +14,22 @@ pub fn enemy_ai(
     #[resource] map: &Map,
     #[resource] turn_queue: &TurnQueue,
 ) {
-    // TODO: Refactor all this to use the Turn Queue instead of letting everyone go at once.
-    // Get the list of enemies
     // If the enemy IsMoving, do nothing - movement system will take care of it
     // Otherwise, look for another entity. If they're in your attack range, attack, otherwise move
-    let enemy_entity = turn_queue.current.unwrap();
-    let enemy_entry = ecs.entry_ref(enemy_entity).unwrap();
-    if let Ok(_is_moving) = enemy_entry.get_component::<IsMoving>() {
-        return;
-    } else {
-        let pos = enemy_entry.get_component::<Point>().unwrap();
-        let fov = enemy_entry.get_component::<FieldOfView>().unwrap();
-        if enemy_attack(map, commands, pos, fov) {
+    // Kludge to prevent ai from running when there's no enemies. TODO: new system to handle this?
+    if turn_queue.queue.len() > 1 {
+        let enemy_entity = turn_queue.queue[0];
+        let enemy_entry = ecs.entry_ref(enemy_entity).unwrap();
+        if let Ok(_is_moving) = enemy_entry.get_component::<IsMoving>() {
             return;
         } else {
-            chasing(ecs, enemy_entity, map, commands);
+            let pos = enemy_entry.get_component::<Point>().unwrap();
+            let fov = enemy_entry.get_component::<FieldOfView>().unwrap();
+            if enemy_attack(map, commands, pos, fov) {
+                return;
+            } else {
+                chasing(ecs, enemy_entity, map, commands);
+            }
         }
     }
 }

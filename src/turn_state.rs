@@ -5,4 +5,5 @@ pub enum TurnState {
     PlayerTargeting,
     PlayerTurn,
     EnemyTurn,
+    GameOver,
 }

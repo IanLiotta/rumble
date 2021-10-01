@@ -26,7 +26,6 @@ pub fn targeting(
             .into_iter()
             .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
             .collect::<Vec<usize>>();
-            // exclude the 0th target_tile, that's the player
             target_tiles.iter().for_each(|target| {
                 draw_batch.set(
                     Map::map_idx2point(*target),
@@ -66,10 +65,10 @@ pub fn targeting(
                                 );
                             }
                             commands.remove_component::<WantsToAttack>(*entity);
-                            *turn_state = TurnState::EnemyTurn;
+                            //*turn_state = TurnState::EnemyTurn;
                         } else {
                             commands.remove_component::<WantsToAttack>(*entity);
-                            *turn_state = TurnState::AwaitingInput;
+                            //*turn_state = TurnState::AwaitingInput;
                         }
                     }
                     _ => {}
