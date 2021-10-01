@@ -8,10 +8,10 @@ const ENEMY_SIGHT_RADIUS: f32 = 5.0;
 #[read_component(Enemy)]
 #[read_component(FieldOfView)]
 pub fn enemy_attack(ecs: &SubWorld, #[resource] map: &Map, commands: &mut CommandBuffer) {
-    <(Entity, &Point, &FieldOfView)>::query()
+    <(&Point, &FieldOfView)>::query()
         .filter(component::<Enemy>())
         .iter(ecs)
-        .for_each(|(entity, pos, fov)| {
+        .for_each(|(pos, fov)| {
             // get a list of other entities inside FOV
             // if there's more than one, roll to pick a random one
             // blat blat

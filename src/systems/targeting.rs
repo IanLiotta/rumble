@@ -11,7 +11,6 @@ pub fn targeting(
     commands: &mut CommandBuffer,
     #[resource] map: &Map,
     #[resource] input_events: &mut std::collections::VecDeque<BEvent>,
-    #[resource] turn_state: &mut TurnState,
 ) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
@@ -65,10 +64,8 @@ pub fn targeting(
                                 );
                             }
                             commands.remove_component::<WantsToAttack>(*entity);
-                            //*turn_state = TurnState::EnemyTurn;
                         } else {
                             commands.remove_component::<WantsToAttack>(*entity);
-                            //*turn_state = TurnState::AwaitingInput;
                         }
                     }
                     _ => {}

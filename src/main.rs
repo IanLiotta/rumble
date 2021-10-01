@@ -23,7 +23,6 @@ mod prelude {
     pub const SCREEN_WIDTH: i32 = 80;
     pub const ARENA_HEIGHT: usize = 40;
     pub const ARENA_WIDTH: usize = 40;
-    pub const FRAME_TIME: f32 = 60.0;
 }
 
 use prelude::*;

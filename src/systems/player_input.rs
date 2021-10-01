@@ -13,7 +13,6 @@ const PLAYER_MOVE_RANGE: f32 = 4.0;
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource] map: &Map,
-    #[resource] turn_state: &mut TurnState,
     #[resource] turn_queue: &TurnQueue,
     #[resource] input_events: &mut std::collections::VecDeque<BEvent>,
     commands: &mut CommandBuffer,
