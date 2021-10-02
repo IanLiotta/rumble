@@ -1,9 +1,10 @@
 message log
 add sprites
 
-Make enemies turns resolve in order instead of all at once
-    add a struct TurnQueue {pub queue: VecDeque<Legion::Entity>}
-    load it as a resource
-    rewrite systems to operate on front of queue instead of searching for all matching entities
-    on end turn, check for outstanding IsMoving messages. If none, pop entity and push it on the back
-    Switch game state to player or enemy turn, depending on who's in front of the queue
+spawner system
+    Make a new entity for spawners
+    place them around the perimiter
+    first spawn is the player
+    after a random time interval see if there's less than four players, spawn another if so
+    
+    

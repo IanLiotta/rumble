@@ -16,6 +16,7 @@ pub fn render_map(ecs: &SubWorld, #[resource] map: &Map) {
             let glyph = match map.tiles[idx] {
                 TileType::Floor => to_cp437('.'),
                 TileType::Wall => to_cp437('#'),
+                TileType::Spawner => to_cp437('^'),
             };
             draw_batch.set(tile_point, ColorPair::new(WHITE, BLACK), glyph);
         }

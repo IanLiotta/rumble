@@ -8,6 +8,7 @@ use legion::world::*;
 #[read_component(IsMoving)]
 #[read_component(ChasesPlayer)]
 #[read_component(Player)]
+#[read_component(Health)]
 pub fn enemy_ai(
     ecs: &SubWorld,
     commands: &mut CommandBuffer,
@@ -25,7 +26,7 @@ pub fn enemy_ai(
         } else {
             let pos = enemy_entry.get_component::<Point>().unwrap();
             let fov = enemy_entry.get_component::<FieldOfView>().unwrap();
-            if enemy_attack(map, commands, pos, fov) {
+            if enemy_attack(ecs, commands, pos, fov) {
                 return;
             } else {
                 chasing(ecs, enemy_entity, map, commands);
@@ -99,43 +100,35 @@ fn chasing(ecs: &SubWorld, enemy: Entity, map: &Map, commands: &mut CommandBuffe
 const ENEMY_SIGHT_RADIUS: f32 = 5.0;
 
 pub fn enemy_attack(
-    map: &Map,
+    ecs: &SubWorld,
     commands: &mut CommandBuffer,
     pos: &Point,
     fov: &FieldOfView,
 ) -> bool {
-    // get a list of other entities inside FOV
-    // if there's more than one, roll to pick a random one
-    // blat blat
-    let target_tiles = tiles_in_range(
-        map,
-        ENEMY_SIGHT_RADIUS,
-        Map::map_idx(pos.x as usize, pos.y as usize),
-    )
-    .into_iter()
-    .filter(|tile| fov.visible_tiles.contains(&Map::map_idx2point(*tile)))
-    .collect::<Vec<usize>>();
-    let targets: Vec<&usize> = target_tiles
-        .iter()
-        .filter(|tile| {
-            !map.tile_contents[**tile].is_empty()
-                && **tile != Map::map_idx(pos.x as usize, pos.y as usize)
-            // don't shoot yourself
+    // query for all enemies and players
+    let mut targets =
+        <(Entity, &Point, &Health)>::query().filter(component::<Enemy>() | component::<Player>());
+    let visible_targets: Vec<(&Entity, &Point, &Health)> = targets
+        .iter(ecs)
+        .filter(|(_, point, _)| {
+            fov.visible_tiles.contains(point)
+                && DistanceAlg::Pythagoras.distance2d(*pos, **point) < ENEMY_SIGHT_RADIUS
+                && *pos != **point
         })
         .collect();
-    if targets.len() >= 1 {
+    if visible_targets.len() >= 1 {
         let mut rng = RandomNumberGenerator::new();
-        let target = targets[rng.roll_dice(0, (targets.len() - 1) as i32) as usize];
+        let target = visible_targets[rng.roll_dice(0, (visible_targets.len() - 1) as i32) as usize];
         commands.push((
             (),
             DrawLine {
                 source: *pos,
-                dest: Map::map_idx2point(*target),
+                dest: *target.1,
                 duration: 10,
             },
         ));
         commands.add_component(
-            map.tile_contents[*target][0],
+            *target.0,
             DirectDamage {
                 amount: 1,
                 source: *pos,

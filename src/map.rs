@@ -5,6 +5,7 @@ const NUM_TILES: usize = (ARENA_HEIGHT * ARENA_WIDTH) as usize;
 pub enum TileType {
     Wall,
     Floor,
+    Spawner,
 }
 
 pub struct Map {

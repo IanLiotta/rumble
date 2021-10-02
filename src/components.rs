@@ -1,6 +1,8 @@
 pub use crate::prelude::*;
 use std::collections::HashSet;
 
+pub struct Spawner {}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct FieldOfView {
     pub visible_tiles: HashSet<Point>,

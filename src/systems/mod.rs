@@ -1,10 +1,9 @@
 use crate::prelude::*;
 
-mod chasing;
 mod damage;
 mod end_turn;
 mod enemy_ai;
-mod enemy_attack;
+
 mod fov;
 mod game_over;
 mod map_indexer;
@@ -14,11 +13,13 @@ mod random_walk;
 mod render_entity;
 mod render_hud;
 mod render_map;
+mod round_start;
 mod spawner;
 mod targeting;
 
 pub fn build_round_start_scheduler() -> Schedule {
     Schedule::builder()
+        .add_system(round_start::round_start_system())
         .add_system(spawner::spawn_mob_system())
         .flush()
         .add_system(map_indexer::map_indexer_system())
@@ -50,6 +51,7 @@ pub fn build_targeting_scheduler() -> Schedule {
         .add_system(targeting::targeting_system())
         .flush()
         .add_system(damage::damage_system())
+        .flush()
         .add_system(end_turn::end_turn_system())
         .build()
 }

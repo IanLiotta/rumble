@@ -93,7 +93,7 @@ impl GameState for State {
                 // Move these mob creations into the round start system eventually
                 self.ecs.push((Player, WantsToSpawn));
                 self.ecs.push(((), WantsToSpawn));
-                //self.ecs.push(((), WantsToSpawn));
+                self.ecs.push(((), WantsToSpawn));
                 self.round_start_systems
                     .execute(&mut self.ecs, &mut self.resources);
             }
@@ -142,41 +142,6 @@ fn main() -> BError {
         .build()?;
     let gs = State::new();
     main_loop(context, gs)
-}
-
-pub fn render_entities(ecs: &mut World) {
-    let mut commands = CommandBuffer::new(ecs);
-    let mut draw_batch = DrawBatch::new();
-    draw_batch.target(1);
-    let mut renderables = <(
-        Entity,
-        &Point,
-        &Render,
-        Option<&mut IsMoving>,
-        Option<&mut FieldOfView>,
-    )>::query();
-    let mut fov = <&FieldOfView>::query().filter(component::<Player>());
-    let player_fov = fov.iter(ecs).nth(0).unwrap().clone();
-    for ent in renderables
-        .iter_mut(ecs)
-        .filter(|(_, pos, _, _, _)| player_fov.visible_tiles.contains(pos))
-    {
-        let (entity, pos, render, is_moving, fov) = ent;
-        draw_batch.set(*pos, render.color, render.glyph);
-        // enemies are moving on top of each other because we're not checking if the desired tile
-        // is empty here. Get access to map and check map.tile_contents[next_step].is_empty()
-        if let Some(mover) = is_moving {
-            commands.add_component(*entity, Map::map_idx2point(mover.path.steps.remove(0)));
-            if mover.path.steps.is_empty() {
-                commands.remove_component::<IsMoving>(*entity);
-            }
-            if let Some(fov) = fov {
-                commands.add_component(*entity, fov.clone_dirty());
-            }
-        }
-    }
-    commands.flush(ecs);
-    draw_batch.submit(2100).expect("Batch error");
 }
 
 pub fn render_attacks(ecs: &mut World) {

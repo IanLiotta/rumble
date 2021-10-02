@@ -32,7 +32,15 @@ pub fn end_turn(
             if let Some(_attack_request) = attack_request {
                 TurnState::PlayerTargeting
             } else {
-                TurnState::EnemyTurn
+                // if movement is done, check to see if the next entity is a player or enemy and go to their turn
+                turn_queue.queue.push_back(turn_queue.queue[0]);
+                turn_queue.queue.pop_front();
+                let entry = ecs.entry_ref(turn_queue.queue[0]).unwrap();
+                if let Ok(_entry) = entry.get_component::<Player>() {
+                    TurnState::AwaitingInput
+                } else {
+                    TurnState::EnemyTurn
+                }
             }
         }
         TurnState::PlayerTurn => {
