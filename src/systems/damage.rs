@@ -24,7 +24,13 @@ pub fn damage(
                 }
                 commands.remove(*entity);
             } else {
-                commands.add_component(*entity, Health { hp: new_hp });
+                commands.add_component(
+                    *entity,
+                    Health {
+                        hp: new_hp,
+                        max_hp: health.max_hp,
+                    },
+                );
                 commands.remove_component::<DirectDamage>(*entity);
             }
         });

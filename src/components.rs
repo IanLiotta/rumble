@@ -73,6 +73,12 @@ pub struct Enemy;
 
 pub struct Health {
     pub hp: i32,
+    pub max_hp: i32,
+}
+
+pub struct Energy {
+    pub energy: i32,
+    pub max_energy: i32,
 }
 
 #[derive(Clone, Debug, PartialEq)]

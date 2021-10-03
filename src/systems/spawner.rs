@@ -18,7 +18,6 @@ pub fn spawn_mob(
         .iter(ecs)
         .map(|mob| *mob)
         .collect();
-    println!("mobs: {:?}", mobs);
     if mobs.len() < 4 {
         commands.push(((), WantsToSpawn));
     }
@@ -38,7 +37,6 @@ pub fn spawn_mob(
         let mut spawners_iter = spawners.iter();
         while !mob_placed {
             if let Some(point) = spawners_iter.next() {
-                println!("Trying Point {:?}", point);
                 let loc = Map::map_idx(point.x as usize, point.y as usize);
                 if map.tiles[loc] == TileType::Floor && !mobs.contains(point) {
                     if let Some(_player) = player {
@@ -52,7 +50,11 @@ pub fn spawn_mob(
                             MovementRange {
                                 move_range: Vec::new(),
                             },
-                            Health { hp: 32 },
+                            Health { hp: 32, max_hp: 32 },
+                            Energy {
+                                energy: 100,
+                                max_energy: 100,
+                            },
                             FieldOfView::new(50),
                         )));
                     } else {
@@ -66,7 +68,11 @@ pub fn spawn_mob(
                             MovementRange {
                                 move_range: Vec::new(),
                             },
-                            Health { hp: 3 },
+                            Health { hp: 3, max_hp: 3 },
+                            Energy {
+                                energy: 100,
+                                max_energy: 100,
+                            },
                             ChasesPlayer,
                             FieldOfView::new(50),
                         )));

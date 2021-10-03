@@ -19,8 +19,8 @@ mod prelude {
     pub use legion::world::SubWorld;
     pub use legion::*;
     pub use std::collections::VecDeque;
-    pub const SCREEN_HEIGHT: i32 = 60;
-    pub const SCREEN_WIDTH: i32 = 80;
+    pub const SCREEN_HEIGHT: i32 = 50;
+    pub const SCREEN_WIDTH: i32 = 40;
     pub const ARENA_HEIGHT: usize = 40;
     pub const ARENA_WIDTH: usize = 40;
 }
