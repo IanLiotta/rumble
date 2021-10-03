@@ -1,65 +1,83 @@
 use crate::prelude::*;
+use rand::seq::SliceRandom;
 
-#[system(for_each)]
+#[system]
 #[read_component(WantsToSpawn)]
 #[read_component(Player)]
+#[read_component(Point)]
+#[read_component(Spawner)]
+#[read_component(Enemy)]
 pub fn spawn_mob(
-    player: Option<&Player>,
-    entity: &Entity,
-    _want_spawn: &WantsToSpawn,
+    ecs: &SubWorld,
     #[resource] map: &Map,
     #[resource] turn_queue: &mut TurnQueue,
     commands: &mut CommandBuffer,
 ) {
-    let mut rng = RandomNumberGenerator::new();
-    let mut mob_placed = false;
-    while !mob_placed {
-        let loc = Map::map_idx(
-            rng.range(1, ARENA_WIDTH - 1),
-            rng.range(1, ARENA_HEIGHT - 1),
-        );
-        if map.tiles[loc] == TileType::Floor {
-            if let Some(_player) = player {
-                turn_queue.queue.push_back(commands.push((
-                    Player,
-                    Map::map_idx2point(loc),
-                    Render {
-                        color: ColorPair::new(BLUE, BLACK),
-                        glyph: to_cp437('@'),
-                    },
-                    DrawOffset {
-                        offset_x: 0.0,
-                        offset_y: 0.0,
-                    },
-                    MovementRange {
-                        move_range: Vec::new(),
-                    },
-                    Health { hp: 32 },
-                    FieldOfView::new(50),
-                )));
-            } else {
-                turn_queue.queue.push_back(commands.push((
-                    Enemy,
-                    Map::map_idx2point(loc),
-                    Render {
-                        color: ColorPair::new(YELLOW, BLACK),
-                        glyph: 3,
-                    },
-                    DrawOffset {
-                        offset_x: 0.0,
-                        offset_y: 0.0,
-                    },
-                    MovementRange {
-                        move_range: Vec::new(),
-                    },
-                    Health { hp: 3 },
-                    ChasesPlayer,
-                    FieldOfView::new(50),
-                )));
-            }
-
-            mob_placed = true;
-        }
+    let mobs: Vec<Point> = <&Point>::query()
+        .filter(component::<Enemy>() | component::<Player>())
+        .iter(ecs)
+        .map(|mob| *mob)
+        .collect();
+    println!("mobs: {:?}", mobs);
+    if mobs.len() < 4 {
+        commands.push(((), WantsToSpawn));
     }
-    commands.remove(*entity);
+    if let Some(spawn_request) = <(Entity, &WantsToSpawn, Option<&Player>)>::query()
+        .iter(ecs)
+        .nth(0)
+    {
+        let (entity, _request, player) = spawn_request;
+        let mut mob_placed = false;
+        let mut spawners: Vec<Point> = <&Point>::query()
+            .filter(component::<Spawner>())
+            .iter(ecs)
+            .map(|point| *point)
+            .collect();
+        let mut rng = rand::thread_rng();
+        spawners.shuffle(&mut rng);
+        let mut spawners_iter = spawners.iter();
+        while !mob_placed {
+            if let Some(point) = spawners_iter.next() {
+                println!("Trying Point {:?}", point);
+                let loc = Map::map_idx(point.x as usize, point.y as usize);
+                if map.tiles[loc] == TileType::Floor && !mobs.contains(point) {
+                    if let Some(_player) = player {
+                        turn_queue.queue.push_back(commands.push((
+                            Player,
+                            Map::map_idx2point(loc),
+                            Render {
+                                color: ColorPair::new(BLUE, BLACK),
+                                glyph: to_cp437('@'),
+                            },
+                            MovementRange {
+                                move_range: Vec::new(),
+                            },
+                            Health { hp: 32 },
+                            FieldOfView::new(50),
+                        )));
+                    } else {
+                        turn_queue.queue.push_back(commands.push((
+                            Enemy,
+                            Map::map_idx2point(loc),
+                            Render {
+                                color: ColorPair::new(YELLOW, BLACK),
+                                glyph: 3,
+                            },
+                            MovementRange {
+                                move_range: Vec::new(),
+                            },
+                            Health { hp: 3 },
+                            ChasesPlayer,
+                            FieldOfView::new(50),
+                        )));
+                    }
+                    mob_placed = true;
+                }
+            } else {
+                println!("Oops, couldn't find a spawner for someone!");
+                break;
+            }
+        }
+        commands.remove(*entity);
+    }
 }

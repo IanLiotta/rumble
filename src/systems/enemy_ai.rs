@@ -108,6 +108,7 @@ pub fn enemy_attack(
     // query for all enemies and players
     let mut targets =
         <(Entity, &Point, &Health)>::query().filter(component::<Enemy>() | component::<Player>());
+    // filter them down to only ones in sight radius, not including yourself
     let visible_targets: Vec<(&Entity, &Point, &Health)> = targets
         .iter(ecs)
         .filter(|(_, point, _)| {
@@ -116,6 +117,7 @@ pub fn enemy_attack(
                 && *pos != **point
         })
         .collect();
+    // if you found some targets roll for a random one and shoot
     if visible_targets.len() >= 1 {
         let mut rng = RandomNumberGenerator::new();
         let target = visible_targets[rng.roll_dice(0, (visible_targets.len() - 1) as i32) as usize];

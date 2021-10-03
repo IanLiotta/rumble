@@ -1431,6 +1431,7 @@ dependencies = [
  "bracket-geometry",
  "bracket-lib",
  "legion",
+ "rand",
 ]
 
 [[package]]

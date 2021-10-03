@@ -18,17 +18,14 @@ pub fn player_input(
     commands: &mut CommandBuffer,
 ) {
     let input = INPUT.lock();
-    let mut mobs = <(Entity, &Point)>::query();
+    let mut mobs = <(Entity, &Point)>::query().filter(component::<Enemy>());
     let mut mobs_idx = Vec::new();
     mobs.iter(ecs).for_each(|(_, mob_point)| {
         mobs_idx.push(Map::map_idx(mob_point.x as usize, mob_point.y as usize));
     });
-    //let mut players = mobs.filter(component::<Player>());
     let mouse_pos = input.mouse_tile(0);
     let mouse_idx = Map::map_idx(mouse_pos.x as usize, mouse_pos.y as usize);
 
-    //let mut fov = <&FieldOfView>::query().filter(component::<Player>());
-    //let player_fov = fov.iter(ecs).nth(0).unwrap();
     // find each player controlled entity
     let player_entity = turn_queue.queue[0];
     let player_entry = ecs.entry_ref(player_entity).unwrap();
@@ -82,7 +79,6 @@ pub fn player_input(
                             destination: mouse_pos,
                         },
                     ));
-                    //*turn_state = TurnState::PlayerTurn;
                 }
             }
             BEvent::KeyboardInput {
@@ -91,7 +87,6 @@ pub fn player_input(
                 ..
             } => {
                 commands.add_component(player_entity, WantsToAttack {});
-                //*turn_state = TurnState::PlayerTargeting;
             }
             _ => {}
         }

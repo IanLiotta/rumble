@@ -2,7 +2,10 @@ use crate::prelude::*;
 
 #[system]
 pub fn round_start(commands: &mut CommandBuffer, #[resource] map: &Map) {
+    // make spawners
+    // spawn an entity on each one, starting with the player.
     create_spawners(commands, map);
+    commands.push((Player, WantsToSpawn));
 }
 
 fn create_spawners(commands: &mut CommandBuffer, map: &Map) {

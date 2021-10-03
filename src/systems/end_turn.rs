@@ -13,7 +13,14 @@ pub fn end_turn(
     #[resource] turn_queue: &mut TurnQueue,
 ) {
     let new_state = match turn_state {
-        TurnState::StartGame => TurnState::AwaitingInput,
+        TurnState::StartGame => {
+            let entry = ecs.entry_ref(turn_queue.queue[0]).unwrap();
+            if let Ok(_entry) = entry.get_component::<Player>() {
+                TurnState::AwaitingInput
+            } else {
+                TurnState::EnemyTurn
+            }
+        }
         TurnState::AwaitingInput => {
             let move_request = <&WantsToMove>::query().iter(ecs).nth(0);
             if let Some(_move_request) = move_request {
@@ -45,7 +52,9 @@ pub fn end_turn(
         }
         TurnState::PlayerTurn => {
             if turn_queue.queue.len() <= 1 {
-                TurnState::GameOver
+                //TurnState::GameOver
+                //Don't game over for testing spawning
+                TurnState::EnemyTurn
             } else {
                 // if someone is moving, keep cycling this state until they're done
                 let movers = <&IsMoving>::query().iter(ecs).nth(0);

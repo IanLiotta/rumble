@@ -20,6 +20,7 @@ mod targeting;
 pub fn build_round_start_scheduler() -> Schedule {
     Schedule::builder()
         .add_system(round_start::round_start_system())
+        .flush()
         .add_system(spawner::spawn_mob_system())
         .flush()
         .add_system(map_indexer::map_indexer_system())

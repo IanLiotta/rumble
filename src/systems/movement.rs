@@ -13,14 +13,6 @@ pub fn move_entity(ecs: &mut SubWorld, #[resource] map: &Map, commands: &mut Com
     // 1: Process and delete move requests.
     let mut move_requests = <(Entity, &WantsToMove)>::query();
     for (entity, want_move) in move_requests.iter(ecs) {
-        // mark the mover's FOV as dirty so we can update it as they go. This might belong in step 3
-        /*
-        if let Ok(entry) = ecs.entry_ref(want_move.entity) {
-            if let Ok(fov) = entry.get_component::<FieldOfView>() {
-                commands.add_component(want_move.entity, fov.clone_dirty());
-            }
-        }
-        */
         // Check if it's a valid move
         if map.can_enter_tile(want_move.destination) {
             let path = a_star_search(
@@ -39,7 +31,6 @@ pub fn move_entity(ecs: &mut SubWorld, #[resource] map: &Map, commands: &mut Com
     }
 
     // 3: Check if there are any outstanding movers and advance them one step.
-    // This is what we're trying to move out of the main loop.
     let mut movers = <(Entity, &mut IsMoving, &FieldOfView)>::query();
     for (entity, is_moving, mover_fov) in movers.iter_mut(ecs) {
         commands.add_component(*entity, Map::map_idx2point(is_moving.path.steps.remove(0)));

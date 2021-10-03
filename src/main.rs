@@ -90,10 +90,6 @@ impl GameState for State {
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::StartGame => {
-                // Move these mob creations into the round start system eventually
-                self.ecs.push((Player, WantsToSpawn));
-                self.ecs.push(((), WantsToSpawn));
-                self.ecs.push(((), WantsToSpawn));
                 self.round_start_systems
                     .execute(&mut self.ecs, &mut self.resources);
             }
