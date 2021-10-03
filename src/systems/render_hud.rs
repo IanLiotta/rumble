@@ -4,6 +4,8 @@ use crate::prelude::*;
 #[read_component(Player)]
 #[read_component(Health)]
 #[read_component(Energy)]
+#[read_component(Spawner)]
+#[read_component(Point)]
 pub fn render_hud(ecs: &SubWorld) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
@@ -38,5 +40,20 @@ pub fn render_hud(ecs: &SubWorld) {
     draw_batch.draw_hollow_box(Rect::with_size(0, 40, 39, 9), ColorPair::new(BLUE, BLACK));
     draw_batch.print_color_centered(40, "Test HUD", ColorPair::new(RED, WHITE));
     draw_batch.print(Point::new(2, 44), "1. Laser");
+    //check if the player stopped on a spawner and wants to leave
+    let player = <&Point>::query()
+        .filter(component::<Player>())
+        .iter(ecs)
+        .nth(0);
+    let spawners: Vec<Point> = <&Point>::query()
+        .filter(component::<Spawner>())
+        .iter(ecs)
+        .map(|point| *point)
+        .collect();
+    if let Some(player) = player {
+        if spawners.contains(player) {
+            draw_batch.print(Point::new(2, 48), "6. Leave");
+        }
+    }
     draw_batch.submit(2200).expect("Batch error");
 }

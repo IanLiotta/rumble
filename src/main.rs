@@ -37,6 +37,7 @@ struct State {
     player_systems: Schedule,
     enemy_systems: Schedule,
     game_over_systems: Schedule,
+    shop_systems: Schedule,
 }
 
 impl State {
@@ -59,6 +60,7 @@ impl State {
             player_systems: build_player_scheduler(),
             enemy_systems: build_enemy_scheduler(),
             game_over_systems: build_game_over_scheduler(),
+            shop_systems: build_shop_scheduler(),
         }
     }
 }
@@ -111,6 +113,12 @@ impl GameState for State {
             }
             TurnState::GameOver => {
                 self.game_over_systems
+                    .execute(&mut self.ecs, &mut self.resources);
+            }
+            TurnState::Shop => {
+                let mb = MapBuilder::new();
+                self.resources.insert(mb.map);
+                self.shop_systems
                     .execute(&mut self.ecs, &mut self.resources);
             }
         }

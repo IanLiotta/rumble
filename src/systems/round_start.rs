@@ -1,7 +1,19 @@
 use crate::prelude::*;
 
 #[system]
-pub fn round_start(commands: &mut CommandBuffer, #[resource] map: &Map) {
+#[read_component(Player)]
+#[read_component(Spawner)]
+#[read_component(WantsToPlay)]
+#[read_component(WantsToLeave)]
+pub fn round_start(ecs: &SubWorld, commands: &mut CommandBuffer, #[resource] map: &Map) {
+    // Consume any WantsToLeave messages
+    <(Entity, &WantsToLeave)>::query()
+        .iter(ecs)
+        .for_each(|(entity, _request)| commands.remove(*entity));
+    // delete any WantsToPlay messages
+    <(Entity, &WantsToPlay)>::query()
+        .iter(ecs)
+        .for_each(|(entity, _request)| commands.remove(*entity));
     // make spawners
     // spawn an entity on each one, starting with the player.
     create_spawners(commands, map);

@@ -43,6 +43,10 @@ pub struct IsMoving {
 
 pub struct WantsToAttack {}
 
+pub struct WantsToLeave {}
+
+pub struct WantsToPlay {}
+
 pub struct DirectDamage {
     pub amount: i32,
     pub source: Point,

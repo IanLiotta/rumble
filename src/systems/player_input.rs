@@ -88,6 +88,13 @@ pub fn player_input(
             } => {
                 commands.add_component(player_entity, WantsToAttack {});
             }
+            BEvent::KeyboardInput {
+                key: VirtualKeyCode::Key6,
+                pressed: true,
+                ..
+            } => {
+                commands.add_component(player_entity, WantsToLeave {});
+            }
             _ => {}
         }
     }

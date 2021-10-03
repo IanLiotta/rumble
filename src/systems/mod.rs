@@ -13,7 +13,9 @@ mod random_walk;
 mod render_entity;
 mod render_hud;
 mod render_map;
+mod round_end;
 mod round_start;
+mod shop;
 mod spawner;
 mod targeting;
 
@@ -37,6 +39,7 @@ pub fn build_input_scheduler() -> Schedule {
         .add_system(render_entity::render_entity_system())
         .add_system(render_hud::render_hud_system())
         .add_system(player_input::player_input_system())
+        .flush()
         .add_system(end_turn::end_turn_system())
         .build()
 }
@@ -59,6 +62,7 @@ pub fn build_targeting_scheduler() -> Schedule {
 
 pub fn build_player_scheduler() -> Schedule {
     Schedule::builder()
+        .add_system(spawner::spawn_mob_system())
         .add_system(movement::move_entity_system())
         .flush()
         .add_system(map_indexer::map_indexer_system())
@@ -96,5 +100,13 @@ pub fn build_game_over_scheduler() -> Schedule {
     Schedule::builder()
         .add_system(render_hud::render_hud_system())
         .add_system(game_over::game_over_system())
+        .build()
+}
+
+pub fn build_shop_scheduler() -> Schedule {
+    Schedule::builder()
+        .add_system(round_end::round_end_system())
+        .add_system(shop::shop_system())
+        .add_system(end_turn::end_turn_system())
         .build()
 }

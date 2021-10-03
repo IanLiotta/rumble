@@ -33,7 +33,8 @@ pub fn move_entity(ecs: &mut SubWorld, #[resource] map: &Map, commands: &mut Com
     // 3: Check if there are any outstanding movers and advance them one step.
     let mut movers = <(Entity, &mut IsMoving, &FieldOfView)>::query();
     for (entity, is_moving, mover_fov) in movers.iter_mut(ecs) {
-        commands.add_component(*entity, Map::map_idx2point(is_moving.path.steps.remove(0)));
+        let next_step = Map::map_idx2point(is_moving.path.steps.remove(0));
+        commands.add_component(*entity, next_step);
         if is_moving.path.steps.is_empty() {
             commands.remove_component::<IsMoving>(*entity);
         }

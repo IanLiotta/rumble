@@ -7,6 +7,8 @@ use crate::prelude::*;
 #[read_component(IsMoving)]
 #[read_component(WantsToAttack)]
 #[read_component(WantsToMove)]
+#[read_component(WantsToLeave)]
+#[read_component(WantsToPlay)]
 pub fn end_turn(
     ecs: &SubWorld,
     #[resource] turn_state: &mut TurnState,
@@ -22,15 +24,21 @@ pub fn end_turn(
             }
         }
         TurnState::AwaitingInput => {
-            let move_request = <&WantsToMove>::query().iter(ecs).nth(0);
-            if let Some(_move_request) = move_request {
-                TurnState::PlayerTurn
+            // See if the player wants to leave
+            let leaving = <&WantsToLeave>::query().iter(ecs).nth(0);
+            if let Some(_leaving) = leaving {
+                TurnState::Shop
             } else {
-                let attack_request = <&WantsToAttack>::query().iter(ecs).nth(0);
-                if let Some(_attack_request) = attack_request {
-                    TurnState::PlayerTargeting
+                let move_request = <&WantsToMove>::query().iter(ecs).nth(0);
+                if let Some(_move_request) = move_request {
+                    TurnState::PlayerTurn
                 } else {
-                    TurnState::AwaitingInput
+                    let attack_request = <&WantsToAttack>::query().iter(ecs).nth(0);
+                    if let Some(_attack_request) = attack_request {
+                        TurnState::PlayerTargeting
+                    } else {
+                        TurnState::AwaitingInput
+                    }
                 }
             }
         }
@@ -51,50 +59,48 @@ pub fn end_turn(
             }
         }
         TurnState::PlayerTurn => {
-            if turn_queue.queue.len() <= 1 {
-                //TurnState::GameOver
-                //Don't game over for testing spawning
-                TurnState::EnemyTurn
+            // if someone is moving, keep cycling this state until they're done
+            let movers = <&IsMoving>::query().iter(ecs).nth(0);
+            if let Some(_mover) = movers {
+                TurnState::PlayerTurn
             } else {
-                // if someone is moving, keep cycling this state until they're done
-                let movers = <&IsMoving>::query().iter(ecs).nth(0);
-                if let Some(_mover) = movers {
-                    TurnState::PlayerTurn
+                // if movement is done, check to see if the next entity is a player or enemy and go to their turn
+                turn_queue.queue.push_back(turn_queue.queue[0]);
+                turn_queue.queue.pop_front();
+                let entry = ecs.entry_ref(turn_queue.queue[0]).unwrap();
+                if let Ok(_entry) = entry.get_component::<Player>() {
+                    TurnState::AwaitingInput
                 } else {
-                    // if movement is done, check to see if the next entity is a player or enemy and go to their turn
-                    turn_queue.queue.push_back(turn_queue.queue[0]);
-                    turn_queue.queue.pop_front();
-                    let entry = ecs.entry_ref(turn_queue.queue[0]).unwrap();
-                    if let Ok(_entry) = entry.get_component::<Player>() {
-                        TurnState::AwaitingInput
-                    } else {
-                        TurnState::EnemyTurn
-                    }
+                    TurnState::EnemyTurn
                 }
             }
         }
         TurnState::EnemyTurn => {
-            if turn_queue.queue.len() <= 1 {
-                TurnState::GameOver
+            // if someone is moving, keep cycling this state until they're done
+            let movers = <&IsMoving>::query().iter(ecs).nth(0);
+            if let Some(_mover) = movers {
+                TurnState::EnemyTurn
             } else {
-                // if someone is moving, keep cycling this state until they're done
-                let movers = <&IsMoving>::query().iter(ecs).nth(0);
-                if let Some(_mover) = movers {
-                    TurnState::EnemyTurn
+                // if movement is done, check to see if the next entity is a player or enemy and go to their turn
+                turn_queue.queue.push_back(turn_queue.queue[0]);
+                turn_queue.queue.pop_front();
+                let entry = ecs.entry_ref(turn_queue.queue[0]).unwrap();
+                if let Ok(_entry) = entry.get_component::<Player>() {
+                    TurnState::AwaitingInput
                 } else {
-                    // if movement is done, check to see if the next entity is a player or enemy and go to their turn
-                    turn_queue.queue.push_back(turn_queue.queue[0]);
-                    turn_queue.queue.pop_front();
-                    let entry = ecs.entry_ref(turn_queue.queue[0]).unwrap();
-                    if let Ok(_entry) = entry.get_component::<Player>() {
-                        TurnState::AwaitingInput
-                    } else {
-                        TurnState::EnemyTurn
-                    }
+                    TurnState::EnemyTurn
                 }
             }
         }
         TurnState::GameOver => return,
+        TurnState::Shop => {
+            let wants_to_play = <(Entity, &WantsToPlay)>::query().iter(ecs).nth(0);
+            if let Some(wants_to_play) = wants_to_play {
+                TurnState::StartGame
+            } else {
+                return;
+            }
+        }
     };
     *turn_state = new_state;
 }
