@@ -105,7 +105,6 @@ pub fn build_game_over_scheduler() -> Schedule {
 
 pub fn build_shop_scheduler() -> Schedule {
     Schedule::builder()
-        .add_system(round_end::round_end_system())
         .add_system(shop::shop_system())
         .add_system(end_turn::end_turn_system())
         .build()

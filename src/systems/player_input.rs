@@ -18,6 +18,13 @@ pub fn player_input(
     commands: &mut CommandBuffer,
 ) {
     let input = INPUT.lock();
+    // find all the spawners so we can check that we only exit on them
+    let spawners: Vec<Point> = <&Point>::query()
+        .filter(component::<Spawner>())
+        .iter(ecs)
+        .map(|point| *point)
+        .collect();
+    // find all the mobs so we don't move into them
     let mut mobs = <(Entity, &Point)>::query().filter(component::<Enemy>());
     let mut mobs_idx = Vec::new();
     mobs.iter(ecs).for_each(|(_, mob_point)| {
@@ -93,7 +100,9 @@ pub fn player_input(
                 pressed: true,
                 ..
             } => {
-                commands.add_component(player_entity, WantsToLeave {});
+                if spawners.contains(player_pos) {
+                    commands.push(((), WantsToLeave {}));
+                }
             }
             _ => {}
         }

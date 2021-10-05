@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[read_component(WantsToPlay)]
 #[read_component(WantsToLeave)]
 pub fn round_start(ecs: &SubWorld, commands: &mut CommandBuffer, #[resource] map: &Map) {
-    // Consume any WantsToLeave messages
+    // delete any WantsToLeave messages
     <(Entity, &WantsToLeave)>::query()
         .iter(ecs)
         .for_each(|(entity, _request)| commands.remove(*entity));
@@ -17,7 +17,11 @@ pub fn round_start(ecs: &SubWorld, commands: &mut CommandBuffer, #[resource] map
     // make spawners
     // spawn an entity on each one, starting with the player.
     create_spawners(commands, map);
-    commands.push((Player, WantsToSpawn));
+    if let None = <&Player>::query().iter(ecs).nth(0) {
+        commands.push((Player, WantsToSpawn));
+    } else {
+        println!("Player already exists.");
+    }
 }
 
 fn create_spawners(commands: &mut CommandBuffer, map: &Map) {

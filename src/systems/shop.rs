@@ -7,6 +7,7 @@ pub fn shop(
     ecs: &SubWorld,
     #[resource] input_events: &mut std::collections::VecDeque<BEvent>,
     commands: &mut CommandBuffer,
+    #[resource] turn_queue: &mut TurnQueue,
 ) {
     // Draw the Shop Menu
     let mut draw_batch = DrawBatch::new();
@@ -22,6 +23,7 @@ pub fn shop(
         .nth(0)
         .unwrap();
     let (player_entity, _, player_health) = player;
+    turn_queue.queue.push_back(*player_entity);
     while let Some(event) = input_events.pop_front() {
         match event {
             // Repair player to full hp

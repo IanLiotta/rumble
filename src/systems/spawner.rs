@@ -7,6 +7,7 @@ use rand::seq::SliceRandom;
 #[read_component(Point)]
 #[read_component(Spawner)]
 #[read_component(Enemy)]
+#[read_component(Render)]
 pub fn spawn_mob(
     ecs: &SubWorld,
     #[resource] map: &Map,
@@ -50,31 +51,24 @@ pub fn spawn_mob(
                 if map.tiles[loc] == TileType::Floor && !mobs.contains(point) {
                     // if there was a player spawn request,
                     if let Some(_player) = player {
-                        // check if the player already exists - move it if so
-                        let existing_player = <(Entity, &Player, &Point)>::query().iter(ecs).nth(0);
-                        if let Some(existing_player) = existing_player {
-                            commands.add_component(*existing_player.0, Map::map_idx2point(loc));
-                        // otherwise make a new one
-                        } else {
-                            turn_queue.queue.push_back(commands.push((
-                                Player,
-                                Map::map_idx2point(loc),
-                                Render {
-                                    color: ColorPair::new(BLUE, BLACK),
-                                    glyph: to_cp437('@'),
-                                },
-                                MovementRange {
-                                    move_range: Vec::new(),
-                                },
-                                Health { hp: 32, max_hp: 32 },
-                                Energy {
-                                    energy: 100,
-                                    max_energy: 100,
-                                },
-                                FieldOfView::new(50),
-                            )));
-                        } // spawend or moved player
-                          //otherwise make an enemy
+                        turn_queue.queue.push_back(commands.push((
+                            Player,
+                            Map::map_idx2point(loc),
+                            Render {
+                                color: ColorPair::new(BLUE, BLACK),
+                                glyph: to_cp437('@'),
+                            },
+                            MovementRange {
+                                move_range: Vec::new(),
+                            },
+                            Health { hp: 32, max_hp: 32 },
+                            Energy {
+                                energy: 100,
+                                max_energy: 100,
+                            },
+                            FieldOfView::new(50),
+                        )));
+                        //otherwise make an enemy
                     } else {
                         turn_queue.queue.push_back(commands.push((
                             Enemy,
