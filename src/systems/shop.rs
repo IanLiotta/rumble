@@ -23,7 +23,6 @@ pub fn shop(
         .nth(0)
         .unwrap();
     let (player_entity, _, player_health) = player;
-    turn_queue.queue.push_back(*player_entity);
     while let Some(event) = input_events.pop_front() {
         match event {
             // Repair player to full hp

@@ -9,10 +9,13 @@ use crate::prelude::*;
 #[read_component(WantsToMove)]
 #[read_component(WantsToLeave)]
 #[read_component(WantsToPlay)]
+#[read_component(Enemy)]
+#[read_component(Spawner)]
 pub fn end_turn(
     ecs: &SubWorld,
     #[resource] turn_state: &mut TurnState,
     #[resource] turn_queue: &mut TurnQueue,
+    commands: &mut CommandBuffer,
 ) {
     let new_state = match turn_state {
         TurnState::StartGame => {
@@ -27,6 +30,17 @@ pub fn end_turn(
             // See if the player wants to leave
             let leaving = <&WantsToLeave>::query().iter(ecs).nth(0);
             if let Some(_leaving) = leaving {
+                <(Entity, &Enemy)>::query()
+                    .iter(ecs)
+                    .for_each(|(entity, _enemy)| commands.remove(*entity));
+                <(Entity, &Spawner)>::query()
+                    .iter(ecs)
+                    .for_each(|(entity, _spawner)| commands.remove(*entity));
+                turn_queue.queue = VecDeque::new();
+                let player = <(Entity, &Player)>::query().iter(ecs).nth(0);
+                if let Some(player) = player {
+                    turn_queue.queue.push_back(*player.0);
+                }
                 TurnState::Shop
             } else {
                 let move_request = <&WantsToMove>::query().iter(ecs).nth(0);

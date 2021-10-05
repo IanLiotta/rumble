@@ -1,10 +1,6 @@
 message log
 add sprites
 
-spawner system
-    Make a new entity for spawners
-    place them around the perimiter
-    first spawn is the player
-    after a random time interval see if there's less than four players, spawn another if so
+enemies are broken after visiting the shop!
     
     
