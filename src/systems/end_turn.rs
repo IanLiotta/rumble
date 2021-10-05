@@ -11,8 +11,9 @@ use crate::prelude::*;
 #[read_component(WantsToPlay)]
 #[read_component(Enemy)]
 #[read_component(Spawner)]
+#[write_component(FieldOfView)]
 pub fn end_turn(
-    ecs: &SubWorld,
+    ecs: &mut SubWorld,
     #[resource] turn_state: &mut TurnState,
     #[resource] turn_queue: &mut TurnQueue,
     commands: &mut CommandBuffer,
@@ -30,15 +31,21 @@ pub fn end_turn(
             // See if the player wants to leave
             let leaving = <&WantsToLeave>::query().iter(ecs).nth(0);
             if let Some(_leaving) = leaving {
+                // Get rid of enemies and spawners
                 <(Entity, &Enemy)>::query()
                     .iter(ecs)
                     .for_each(|(entity, _enemy)| commands.remove(*entity));
                 <(Entity, &Spawner)>::query()
                     .iter(ecs)
                     .for_each(|(entity, _spawner)| commands.remove(*entity));
+                // clear the turn queue, then put the player back into it
+                // mark the player's fov as dirty
                 turn_queue.queue = VecDeque::new();
-                let player = <(Entity, &Player)>::query().iter(ecs).nth(0);
+                let player = <(Entity, &Player, &mut FieldOfView)>::query()
+                    .iter_mut(ecs)
+                    .nth(0);
                 if let Some(player) = player {
+                    player.2.is_dirty = true;
                     turn_queue.queue.push_back(*player.0);
                 }
                 TurnState::Shop

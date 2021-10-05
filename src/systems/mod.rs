@@ -27,7 +27,6 @@ pub fn build_round_start_scheduler() -> Schedule {
         .flush()
         .add_system(map_indexer::map_indexer_system())
         .flush()
-        .add_system(fov::fov_system())
         .add_system(end_turn::end_turn_system())
         .build()
 }
