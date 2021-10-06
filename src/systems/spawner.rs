@@ -52,7 +52,7 @@ pub fn spawn_mob(
                 if map.tiles[loc] == TileType::Floor && !mobs.contains(point) {
                     // if there was a player spawn request,
                     if let Some(_player) = player {
-                        turn_queue.queue.push_back(commands.push((
+                        let player_entity = commands.push((
                             Player,
                             Map::map_idx2point(loc),
                             Render {
@@ -68,15 +68,26 @@ pub fn spawn_mob(
                                 max_energy: 100,
                             },
                             FieldOfView::new(50),
-                            Score {
-                                current: 0,
-                                max: 0,
+                            Score { current: 0, max: 0 },
+                        ));
+                        //put the new player in the turn queue
+                        turn_queue.queue.push_back(player_entity);
+                        // make and attach a gun to the new player
+                        commands.push((
+                            Weapon {
+                                name: "Laser".to_string(),
+                                range: 6.5,
                             },
-                        )));
+                            WeaponEquipped {
+                                owner: player_entity,
+                            },
+                            WeaponDamageDirect { damage: 3 },
+                            WeaponUsesEnergy { amount: 5 },
+                        ));
                         //otherwise make an enemy
                     } else {
                         turn_queue.queue.push_back(commands.push((
-                            Enemy {value: 1000},
+                            Enemy { value: 1000 },
                             Map::map_idx2point(loc),
                             Render {
                                 color: ColorPair::new(YELLOW, BLACK),

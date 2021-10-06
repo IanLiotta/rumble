@@ -1,6 +1,7 @@
 message log
 add sprites
 
-enemies are broken after visiting the shop!
-    
-    
+weapons: 
+ weapons are entities
+ weapons have components that define them
+ wepaons have an Equipped component that defines who owns it

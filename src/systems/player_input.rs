@@ -10,6 +10,7 @@ const PLAYER_MOVE_RANGE: f32 = 4.5;
 #[read_component(Player)]
 #[read_component(Point)]
 #[read_component(FieldOfView)]
+#[read_component(WeaponEquipped)]
 pub fn player_input(
     ecs: &mut SubWorld,
     #[resource] map: &Map,
@@ -24,6 +25,7 @@ pub fn player_input(
         .iter(ecs)
         .map(|point| *point)
         .collect();
+
     // find all the mobs so we don't move into them
     let mut mobs = <(Entity, &Point)>::query().filter(component::<Enemy>());
     let mut mobs_idx = Vec::new();
@@ -38,6 +40,7 @@ pub fn player_input(
     let player_entry = ecs.entry_ref(player_entity).unwrap();
     let player_pos = player_entry.get_component::<Point>().unwrap();
     let player_fov = player_entry.get_component::<FieldOfView>().unwrap();
+
     // find the valid moves within the player's movement range
     let mut possible_moves: Vec<usize> = vec![];
     tiles_in_range(
@@ -73,6 +76,16 @@ pub fn player_input(
             move_range: possible_moves.clone(),
         },
     );
+
+    // Find the player's weapons
+    let weapons: Vec<(&Entity, &WeaponEquipped)> =
+        <(Entity, &WeaponEquipped)>::query().iter(ecs).collect();
+    let mut owned_weapons: Vec<&Entity> = Vec::new();
+    for weapon in weapons {
+        if weapon.1.owner == player_entity {
+            owned_weapons.push(weapon.0);
+        }
+    }
     // if a valid tile is clicked, queue a message-entity that the player wants to move
     while let Some(event) = input_events.pop_front() {
         match event {
@@ -93,7 +106,13 @@ pub fn player_input(
                 pressed: true,
                 ..
             } => {
-                commands.add_component(player_entity, WantsToAttack {});
+                // Attack with first weapon
+                commands.add_component(
+                    player_entity,
+                    WantsToAttack {
+                        weapon: *owned_weapons[0],
+                    },
+                );
             }
             BEvent::KeyboardInput {
                 key: VirtualKeyCode::Key6,

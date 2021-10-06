@@ -41,7 +41,9 @@ pub struct IsMoving {
     pub path: NavigationPath,
 }
 
-pub struct WantsToAttack {}
+pub struct WantsToAttack {
+    pub weapon: Entity,
+}
 
 pub struct WantsToLeave {}
 
@@ -111,4 +113,27 @@ pub struct DrawOffset {
 pub struct Score {
     pub current: i32,
     pub max: i32,
+}
+
+// Weapons
+pub struct Weapon {
+    pub name: String,
+    pub range: f32,
+}
+pub struct WeaponEquipped {
+    pub owner: Entity,
+}
+
+pub struct WeaponDamageDirect {
+    pub damage: i32,
+}
+
+pub struct WeaponUsesEnergy {
+    pub amount: i32,
+}
+
+pub struct WeaponUsesAmmo {
+    pub amount: usize,
+    pub current: usize,
+    pub max: usize,
 }

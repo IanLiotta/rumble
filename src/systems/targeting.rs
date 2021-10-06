@@ -6,6 +6,7 @@ const PLAYER_TARGETING_RANGE: f32 = 4.5;
 #[read_component(WantsToAttack)]
 #[read_component(Point)]
 #[read_component(FieldOfView)]
+#[read_component(Weapon)]
 pub fn targeting(
     ecs: &mut SubWorld,
     commands: &mut CommandBuffer,
@@ -14,12 +15,17 @@ pub fn targeting(
 ) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
+    // get each entity that wants to attack, its position, and fov.
     <(Entity, &WantsToAttack, &Point, &FieldOfView)>::query()
         .iter(ecs)
-        .for_each(|(entity, _, pos, fov)| {
+        .for_each(|(entity, attack_req, pos, fov)| {
+            // get the weapon being used to attack
+            let weapon = ecs.entry_ref(attack_req.weapon).unwrap();
+            let weapon_range = weapon.get_component::<Weapon>().unwrap().range;
+            // get and draw targeting range
             let target_tiles = tiles_in_range(
                 map,
-                PLAYER_TARGETING_RANGE,
+                weapon_range,
                 Map::map_idx(pos.x as usize, pos.y as usize),
             )
             .into_iter()
