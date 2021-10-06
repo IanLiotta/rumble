@@ -61,6 +61,10 @@ pub struct DrawLine {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WantsToSpawn;
 
+pub struct AddScore {
+    pub score: i32,
+}
+
 // Mob traits
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -73,7 +77,9 @@ pub struct Render {
 pub struct Player;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Enemy;
+pub struct Enemy {
+    pub value: i32,
+}
 
 pub struct Health {
     pub hp: i32,
@@ -100,4 +106,9 @@ pub struct ChasesPlayer;
 pub struct DrawOffset {
     pub offset_x: f32,
     pub offset_y: f32,
+}
+
+pub struct Score {
+    pub current: i32,
+    pub max: i32,
 }

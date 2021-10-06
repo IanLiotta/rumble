@@ -4,7 +4,7 @@
 
 use crate::prelude::*;
 //replace this with a component value later
-const PLAYER_MOVE_RANGE: f32 = 4.0;
+const PLAYER_MOVE_RANGE: f32 = 4.5;
 
 #[system]
 #[read_component(Player)]

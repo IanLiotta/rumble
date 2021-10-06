@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 //TODO: Replace this with a component value later
-const PLAYER_TARGETING_RANGE: f32 = 5.0;
+const PLAYER_TARGETING_RANGE: f32 = 4.5;
 #[system]
 #[read_component(WantsToAttack)]
 #[read_component(Point)]

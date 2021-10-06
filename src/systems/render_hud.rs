@@ -6,9 +6,11 @@ use crate::prelude::*;
 #[read_component(Energy)]
 #[read_component(Spawner)]
 #[read_component(Point)]
+#[read_component(Score)]
 pub fn render_hud(ecs: &SubWorld) {
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(2);
+    // get and print player health
     let player_health = <&Health>::query()
         .filter(component::<Player>())
         .iter(ecs)
@@ -23,6 +25,7 @@ pub fn render_hud(ecs: &SubWorld) {
         );
     }
     draw_batch.print_centered(41, "Health");
+    // get and print player energy
     let player_energy = <&Energy>::query()
         .filter(component::<Player>())
         .iter(ecs)
@@ -37,6 +40,20 @@ pub fn render_hud(ecs: &SubWorld) {
         );
     }
     draw_batch.print_centered(42, "Energy");
+    // get and print player score
+    let player_score = <&Score>::query()
+        .filter(component::<Player>())
+        .iter(ecs)
+        .nth(0);
+    if let Some(player_score) = player_score {
+        draw_batch.print_centered(
+            43,
+            format!(
+                "Current: ${} Max: ${}",
+                player_score.current, player_score.max
+            ),
+        );
+    }
     draw_batch.draw_hollow_box(Rect::with_size(0, 40, 39, 9), ColorPair::new(BLUE, BLACK));
     draw_batch.print_color_centered(40, "Test HUD", ColorPair::new(RED, WHITE));
     draw_batch.print(Point::new(2, 44), "1. Laser");

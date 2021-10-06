@@ -15,6 +15,7 @@ mod render_hud;
 mod render_map;
 mod round_end;
 mod round_start;
+mod score;
 mod shop;
 mod spawner;
 mod targeting;
@@ -55,6 +56,7 @@ pub fn build_targeting_scheduler() -> Schedule {
         .flush()
         .add_system(damage::damage_system())
         .flush()
+        .add_system(score::score_system())
         .add_system(end_turn::end_turn_system())
         .build()
 }

@@ -38,6 +38,7 @@ pub fn shop(
                         max_hp: player_health.max_hp,
                     },
                 );
+                draw_batch.print_centered(2, "Repaired!");
             }
             // Start the next round of gameplay
             BEvent::KeyboardInput {

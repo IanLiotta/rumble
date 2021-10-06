@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use rand::seq::SliceRandom;
+use rand::Rng;
 
 #[system]
 #[read_component(WantsToSpawn)]
@@ -14,14 +15,15 @@ pub fn spawn_mob(
     #[resource] turn_queue: &mut TurnQueue,
     commands: &mut CommandBuffer,
 ) {
+    let mut rng = rand::thread_rng();
     // check how many mobs currently exist
     let mobs: Vec<Point> = <&Point>::query()
         .filter(component::<Enemy>() | component::<Player>())
         .iter(ecs)
         .map(|mob| *mob)
         .collect();
-    // if there are fewer than four mobs, queue up another one to spawn
-    if mobs.len() < 4 {
+    // if there are fewer than four mobs, roll to queue up another one to spawn
+    if mobs.len() < 4 && rng.gen::<f32>() <= 0.03 {
         commands.push(((), WantsToSpawn));
     }
     // Check if there are queued spawn requests (and if they're for the player)
@@ -38,7 +40,6 @@ pub fn spawn_mob(
             .iter(ecs)
             .map(|point| *point)
             .collect();
-        let mut rng = rand::thread_rng();
         spawners.shuffle(&mut rng);
         let mut spawners_iter = spawners.iter();
         // loop while we try to place the mob at each spawner
@@ -67,11 +68,15 @@ pub fn spawn_mob(
                                 max_energy: 100,
                             },
                             FieldOfView::new(50),
+                            Score {
+                                current: 0,
+                                max: 0,
+                            },
                         )));
                         //otherwise make an enemy
                     } else {
                         turn_queue.queue.push_back(commands.push((
-                            Enemy,
+                            Enemy {value: 1000},
                             Map::map_idx2point(loc),
                             Render {
                                 color: ColorPair::new(YELLOW, BLACK),
