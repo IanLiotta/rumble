@@ -67,6 +67,10 @@ pub struct AddScore {
     pub score: i32,
 }
 
+pub struct DrainEnergy {
+    pub amount: i32,
+}
+
 // Mob traits
 
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -1,12 +1,13 @@
 use crate::prelude::*;
 
-//TODO: Replace this with a component value later
-const PLAYER_TARGETING_RANGE: f32 = 4.5;
 #[system]
 #[read_component(WantsToAttack)]
 #[read_component(Point)]
 #[read_component(FieldOfView)]
 #[read_component(Weapon)]
+#[read_component(WeaponDamageDirect)]
+#[read_component(WeaponUsesEnergy)]
+#[read_component(WeaponEquipped)]
 pub fn targeting(
     ecs: &mut SubWorld,
     commands: &mut CommandBuffer,
@@ -61,13 +62,30 @@ pub fn targeting(
                                         duration: 10,
                                     },
                                 ));
-                                commands.add_component(
-                                    *entity,
-                                    DirectDamage {
-                                        amount: 10,
-                                        source: *pos,
-                                    },
-                                );
+                                // check if weapon uses energy, reduce shooter energy if so
+                                if let Ok(uses_energy) = weapon.get_component::<WeaponUsesEnergy>()
+                                {
+                                    let shooter =
+                                        weapon.get_component::<WeaponEquipped>().unwrap().owner;
+                                    commands.add_component(
+                                        shooter,
+                                        DrainEnergy {
+                                            amount: uses_energy.amount,
+                                        },
+                                    );
+                                }
+                                // check if weapon does direct damage, signal if so
+                                if let Ok(_direct_damage) =
+                                    weapon.get_component::<WeaponDamageDirect>()
+                                {
+                                    commands.add_component(
+                                        *entity,
+                                        DirectDamage {
+                                            amount: 10,
+                                            source: *pos,
+                                        },
+                                    );
+                                }
                             }
                             commands.remove_component::<WantsToAttack>(*entity);
                         } else {

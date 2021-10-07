@@ -2,6 +2,8 @@ use crate::prelude::*;
 use rand::seq::SliceRandom;
 use rand::Rng;
 
+const SPAWN_CHANCE: f32 = 0.5;
+
 #[system]
 #[read_component(WantsToSpawn)]
 #[read_component(Player)]
@@ -23,7 +25,7 @@ pub fn spawn_mob(
         .map(|mob| *mob)
         .collect();
     // if there are fewer than four mobs, roll to queue up another one to spawn
-    if mobs.len() < 4 && rng.gen::<f32>() <= 0.03 {
+    if mobs.len() < 4 && rng.gen::<f32>() <= SPAWN_CHANCE {
         commands.push(((), WantsToSpawn));
     }
     // Check if there are queued spawn requests (and if they're for the player)
